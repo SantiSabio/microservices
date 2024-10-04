@@ -1,6 +1,25 @@
-version: '3.8'
-
 services:
+  catalogo:
+    build: ./catalog
+    ports:
+      - "5001:5001"
+    env_file:
+      - .env
+    depends_on:
+      - mysql_db
+    networks:
+      - mynetwork
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      - catalogo
+    networks:
+      - mynetwork
 
   mysql_db:
     image: mysql
@@ -11,77 +30,12 @@ services:
       MYSQL_DATABASE: catalogodb
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./docs:/docker-entrypoint-initdb.d  # Asegúrate de que esta línea esté correcta
-
-    networks:
-      - mynetwork
-      
-  api-gateway:
-    build:
-      context: ./api-gateway
-    ports:
-      - "5000:5000"
-    env_file:
-      - .env
-    depends_on:
-      - ms-catalogo
     networks:
       - mynetwork
 
-  ms-catalogo:
-    build:
-      context: .
-      dockerfile: ./ms-catalogue/Dockerfile
-    ports:
-      - "5001:5000"
-    container_name: catalogue-services
-    env_file:
-      - .env
-    depends_on:
-      - mysql_db
-    networks:
-      - mynetwork
-
-  ms-inventory:
-    build:
-      context: .
-      dockerfile: ./ms-inventory/Dockerfile
-    ports:
-      - "5002:5000"
-    container_name: inventory-services
-    depends_on:
-      - mysql_db
-    networks:
-      - mynetwork
-
-  ms-payment:
-    build:
-      context: .
-      dockerfile: ./ms-payment/Dockerfile
-    ports:
-      - "5003:5000"
-    container_name: payment-services
-    depends_on:
-      - mysql_db
-    networks:
-      - mynetwork
-
-  ms-cart:
-    build:
-      context: .
-      dockerfile: ./ms-cart/Dockerfile
-    ports:
-      - "5004:5000"
-    container_name: cart-services
-    depends_on:
-      - mysql_db
-    networks:
-      - mynetwork
+volumes:
+  mysql_data:
 
 networks:
   mynetwork:
     driver: bridge
-
-volumes:
-  mysql_data:
-  docs:

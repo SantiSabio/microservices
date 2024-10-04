@@ -1,8 +1,8 @@
 #catalogo/app/routes.py
 from flask import Blueprint
 
-catalogo = Blueprint('catalogo', __name__)
+catalogo = Blueprint('catalog', __name__)
 
-@catalogo.route('/catalogo')
+@catalogo.route('/catalog')
 def get_catalogo():
     return "Este es el catálogo"

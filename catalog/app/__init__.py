@@ -12,7 +12,7 @@ def create_app():
 
     db.init_app(app)
 
-    from .routes import catalogo
-    app.register_blueprint(catalogo)
+    from .routes import catalog
+    app.register_blueprint(catalog)
     
     return app
