@@ -22,6 +22,7 @@ Este repositorio contiene una aplicación de microservicios para un sistema de c
     ```bash
     docker-compose up --build
     ```
+flask create-db
 
 ## Ejecución
 
@@ -42,7 +43,7 @@ microservices/
 │   ├── Dockerfile
 │   ├── requirements.txt
 │   └── run.py
-├── catalogo/
+├── catalog/
 │   ├── app/
 │   │   ├── __init__.py
 │   │   ├── models.py

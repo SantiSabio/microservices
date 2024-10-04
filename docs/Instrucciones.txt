@@ -1,5 +1,5 @@
 http://127.0.0.1:5000/productos
 En esta ruta deberia devolver el mensaje de "Estos son los productos"
 
-http://127.0.0.1:5001/catalogo
+http://127.0.0.1:5001/catalog
 En esta ruta deberia devolver el mensaje de "Este es el catalogo"
