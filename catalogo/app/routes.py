@@ -1,3 +1,4 @@
+#catalogo/app/routes.py
 from flask import Blueprint
 
 catalogo = Blueprint('catalogo', __name__)
