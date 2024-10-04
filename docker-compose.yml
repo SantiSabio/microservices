@@ -1,4 +1,3 @@
-version: '3'
 services:
   catalogo:
     build: ./catalogo
@@ -8,6 +7,8 @@ services:
       - .env
     depends_on:
       - mysql_db
+    networks:
+      - mynetwork
 
   api-gateway:
     build: ./api-gateway
@@ -17,6 +18,8 @@ services:
       - .env
     depends_on:
       - catalogo
+    networks:
+      - mynetwork
 
   mysql_db:
     image: mysql
@@ -25,4 +28,14 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: catalogodb
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mynetwork
 
+volumes:
+  mysql_data:
+
+networks:
+  mynetwork:
+    driver: bridge

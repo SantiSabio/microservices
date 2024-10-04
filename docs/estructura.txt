@@ -1,0 +1,21 @@
+microservices/
+├── api-gateway/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── routes.py
+│   ├── Dockerfile
+│   ├──requirements.txt
+│   └── run.py
+├── catalogo/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── routes.py
+│   ├── Dockerfile
+│   ├──requirements.txt
+│   └── run.py
+├── docs/
+│   ├── estructura.txt
+├── docker-compose.yml
+├── README.md
+└── .env
