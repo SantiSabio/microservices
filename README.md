@@ -26,7 +26,7 @@ Este repositorio contiene una aplicación de microservicios para un sistema de c
 ## Ejecución
 
 - **Microservicio de catálogo**:
-    - URL: `http://localhost:5001/catalogo`
+    - URL: `http://localhost:5001/catalog`
     
 - **API Gateway**:
     - URL: `http://localhost:5000/productos`
