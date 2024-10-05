@@ -73,6 +73,10 @@ services:
     ports:
       - "5004:5000"
     container_name: cart-services
+
+    environment:
+      FLASK=environment
+      
     depends_on:
       - mysql_db
     networks:
