@@ -12,13 +12,13 @@ Este repositorio contiene una aplicación de microservicios para un sistema de c
 
 ## Instalación
 
-1. Clona el repositorio:
+1. Clonar el repositorio:
     ```bash
     git clone https://github.com/SantiSabio/microservices.git
     cd microservices
     ```
 
-2. Crea y levanta los contenedores:
+2. Crear y levantar los contenedores:
     ```bash
     docker-compose up --build
     ```
@@ -27,7 +27,7 @@ flask create-db
 ## Ejecución
 
 - **Microservicio de catálogo**:
-    - URL: `http://localhost:5001/catalog`
+    - URL: `http://localhost:5001/catalogo`
     
 - **API Gateway**:
     - URL: `http://localhost:5000/productos`
@@ -43,7 +43,7 @@ microservices/
 │   ├── Dockerfile
 │   ├── requirements.txt
 │   └── run.py
-├── catalog/
+├── ms-catalogo/
 │   ├── app/
 │   │   ├── __init__.py
 │   │   ├── models.py

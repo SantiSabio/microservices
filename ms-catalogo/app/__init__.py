@@ -1,4 +1,4 @@
-#catalog/app/__init__.py
+#ms-catalogo/app/__init__.py
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -12,7 +12,7 @@ def create_app():
 
     db.init_app(app)
 
-    from .routes import catalog
-    app.register_blueprint(catalog)
+    from .routes import catalogo
+    app.register_blueprint(catalogo)
     
     return app
