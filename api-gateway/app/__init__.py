@@ -7,6 +7,7 @@ def create_app():
     
     # Configuración de la aplicación
     app.config['SECRET_KEY'] = 'supersecretkey'
+    app.config['DEBUG'] = True
 
     # Registro de las rutas
     app.register_blueprint(api_gateway)

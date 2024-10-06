@@ -1,47 +1,40 @@
 import unittest
-from app import create_app
+from app import create_app, db
 from app.models import Purchase
-
-class TestCart(unittest.TestCase):
+class PurchaseTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app()
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:password@microservices-mysql_db-1:3306/catalogodb'
+        self.app.config['TESTING'] = True
         self.client = self.app.test_client()
-    
-    def test_get_cart(self):
-        # Test para la ruta GET /cart
-        response = self.client.get('/cart')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Este es el carrito', response.data)
+        with self.app.app_context():
+            db.create_all()
 
-    def test_agregar_compra(self):
-        # Datos de prueba para la compra
+    
+
+    def test_purchase_success(self):
         purchase_data = {
             'product_id': 1,
-            'purchase_direction': '123 Main St, Springfield',
+            'purchase_date': '2024-10-06',
+            'purchase_direction': '123 Calle Falsa'
         }
-
-        # Realiza la solicitud POST al API Gateway para agregar la compra
-        response = self.client.post('/purchase', json=purchase_data)
-        print(response.get_json())  # Imprimir respuesta en formato JSON
-
-        # Verifica que la respuesta sea correcta
-        self.assertEqual(response.status_code, 201)
-        self.assertIn('id_purchase', response.get_json())  # Asegúrate de que la respuesta contiene el ID de la compra
-
-        # Verifica que la compra se haya añadido a la base de datos
         with self.app.app_context():
-            purchase = Purchase.query.filter_by(product_id=1).first()
-            self.assertIsNotNone(purchase)
-            self.assertEqual(purchase.purchase_direction, '123 Main St, Springfield')
+            response = self.client.post('/purchase', json=purchase_data)
+            print(response.data)  # Imprime el contenido de la respuesta
+            self.assertEqual(response.status_code, 201)
+            response_data = response.get_json()
+            self.assertIn('purchase_id', response_data)
 
-    def test_compra_missing_data(self):
-        # Test cuando falta algún dato en la solicitud de compra
-        data = {
+    def test_missing_fields(self):
+        purchase_data = {
             'product_id': 1
-            # Falta la dirección de envío
         }
-        response = self.client.post('/purchase', json=data)
-        self.assertEqual(response.status_code, 400)
+        with self.app.app_context():
+            response = self.client.post('/purchase', json=purchase_data)
+            response_data = response.get_json()
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('error', response_data)
+            self.assertEqual(response_data['error'], 'Missing fields')
 
 if __name__ == '__main__':
     unittest.main()

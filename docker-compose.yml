@@ -1,24 +1,23 @@
-version: '3.8'
 services:
-  api-gateway:
-    build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
-    container_name: api-gateway
-    networks:
-      - mynetwork
-  
   ms-cart:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: ./ms-cart
     ports:
-      - "5004:5000"
-    container_name: cart-services
+      - "5004:5004"
+    env_file:
+      - .env
     depends_on:
       - mysql_db
+    networks:
+      - mynetwork
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      - ms-cart
     networks:
       - mynetwork
 
@@ -26,7 +25,6 @@ services:
     image: mysql
     ports:
       - "3307:3306"
-    container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: catalogodb
@@ -36,9 +34,9 @@ services:
     networks:
       - mynetwork
 
+volumes:
+  mysql_data:
+
 networks:
   mynetwork:
     driver: bridge
-
-volumes:
-  mysql_data:
