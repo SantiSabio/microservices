@@ -1,6 +1,15 @@
-
-
+version: '3.8'
 services:
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    container_name: api-gateway
+    networks:
+      - mynetwork
+  
   ms-cart:
     build:
       context: .
@@ -23,7 +32,7 @@ services:
       MYSQL_DATABASE: catalogodb
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./db_query.sql:/docker-entrypoint-initdb.d/db_query.sql  # Monta directamente el archivo
+      - ./mysql/db_query.sql:/docker-entrypoint-initdb.d/db_query.sql
     networks:
       - mynetwork
 

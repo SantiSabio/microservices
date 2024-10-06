@@ -12,11 +12,11 @@ def obtener_productos():
 @api_gateway.route('/cart', methods=['GET', 'POST'])
 def manage_cart():
     if request.method == 'GET':  # Cambia requests.method a request.method
-        url = 'http://ms-cart:5002/cart'
+        url = 'http://ms-cart:5004/cart'
         response = requests.get(url)
         return jsonify(response.json()), response.status_code
     elif request.method == 'POST':
-        url = 'http://ms-cart:5002/compra'
+        url = 'http://ms-cart:5004/compra'
         response = requests.post(url, json=request.get_json())  # Usa request.get_json()
         return jsonify(response.json()), response.status_code
 
@@ -29,7 +29,7 @@ def add_purchase():
         return jsonify({'error': 'Missing fields'}), 400
     
     # Construir la URL del microservicio de compras
-    url = 'http://ms-cart:5000/purchase'
+    url = 'http://ms-cart:5004/purchase'
     response = requests.post(url, json=request.json)  # Reenviar los datos al microservicio
 
     return jsonify(response.json()), response.status_code
