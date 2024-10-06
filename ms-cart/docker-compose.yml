@@ -1,0 +1,35 @@
+
+
+services:
+  ms-cart:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5004:5000"
+    container_name: cart-services
+    depends_on:
+      - mysql_db
+    networks:
+      - mynetwork
+
+  mysql_db:
+    image: mysql
+    ports:
+      - "3307:3306"
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: catalogodb
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db_query.sql:/docker-entrypoint-initdb.d/db_query.sql  # Monta directamente el archivo
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  mysql_data:
