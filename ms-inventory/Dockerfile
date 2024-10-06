@@ -2,9 +2,16 @@ FROM python:3.9
 
 WORKDIR /app
 
-COPY ../docs/requirements.txt .
+COPY requirements.txt requirements.txt
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "run.py"]
+EXPOSE 5000
+
+ENV FLASK_APP=run.py
+ENV FLASK_ENV=development
+ENV DATABASE_URI=mysql://root:password@mysql_container/inventory_db
+
+CMD ["flask", "run", "--host=0.0.0.0"]
