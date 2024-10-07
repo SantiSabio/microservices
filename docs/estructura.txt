@@ -6,7 +6,7 @@ microservices/
 │   ├── Dockerfile
 │   ├──requirements.txt
 │   └── run.py
-├── catalogo/
+├── catalog/
 │   ├── app/
 │   │   ├── __init__.py
 │   │   ├── models.py

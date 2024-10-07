@@ -1,4 +1,4 @@
-#catalogo/app/__init__.py
+#ms-catalogo/app/__init__.py
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
