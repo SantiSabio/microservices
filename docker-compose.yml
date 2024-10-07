@@ -14,8 +14,7 @@ services:
     build: ./api-gateway
     ports:
       - "5000:5000"
-    env_file:
-      - .env
+    
     depends_on:
       - ms-cart
     networks:
