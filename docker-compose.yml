@@ -13,7 +13,7 @@ services:
   ms-cart:
     build: ./ms-cart
     ports:
-      - "5004:5004"
+      - "5002:5002"
     env_file:
       - .env
     depends_on:
@@ -42,7 +42,6 @@ services:
       MYSQL_DATABASE: catalogodb
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./mysql/db_query.sql:/docker-entrypoint-initdb.d/db_query.sql
     networks:
       - mynetwork
 

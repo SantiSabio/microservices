@@ -2,6 +2,7 @@
 from datetime import datetime
 from flask import Blueprint, request,jsonify
 from .models import db, Purchase
+
 cart = Blueprint('cart', __name__)
 
 # Ruta para manejar la creación de compras
