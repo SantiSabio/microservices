@@ -1,4 +1,4 @@
-#cart/app/__init__.py
+#ms-cart/app/__init__.py
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
