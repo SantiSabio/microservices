@@ -1,29 +1,15 @@
-from .models import db, Product, InventoryTransaction
+from .models import db, Stock
 
-def process_inventory_update(product_id, user_id, quantity, transaction_type):
+def update_stock(producto_id, cantidad, entrada_salida):
     try:
-        # Inicia una transacción
-        product = Product.query.get(product_id)
-        if not product:
-            raise Exception("Product not found")
-
-        # Operaciones ACID
-        if transaction_type == 'purchase':
-            if product.stock_quantity < quantity:
-                raise Exception("Insufficient stock")
-            product.stock_quantity -= quantity
-        elif transaction_type == 'refund':
-            product.stock_quantity += quantity
-        
-        # Registrar la transacción
-        transaction = InventoryTransaction(
-            product_id=product_id,
-            user_id=user_id,
-            quantity=quantity,
-            transaction_type=transaction_type
+        stock = Stock(
+            producto_id=producto_id,
+            cantidad=cantidad,
+            entrada_salida=entrada_salida
         )
-        db.session.add(transaction)
-        db.session.commit()  # Commit garantiza ACID
+        db.session.add(stock)
+        db.session.commit()  # Garantiza la atomicidad y durabilidad
+        return stock
     except Exception as e:
-        db.session.rollback()  # Revertir si hay error, garantiza atomicidad
+        db.session.rollback()  # Si hay error, revierte la transacción
         raise e
