@@ -7,6 +7,7 @@ def create_app():
     
     
     app.config['SECRET_KEY'] = 'supersecretkey'
+    app.config['DEBUG'] = True
 
     
     app.register_blueprint(api_gateway)
