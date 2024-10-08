@@ -1,26 +1,15 @@
 services:
 
-  ms-catalogo:
-    build: ./ms-inventory
+  ms-catalog:
+    build: ./ms-catalog
     ports:
-      - "5003:5003"
+      - "5001:5001"
     env_file:
       - .env
     depends_on:
       - mysql_db
     networks:
       - mynetwork
-
-  #ms-catalogo:
-  #  build: ./ms-catalogo
-  #  ports:
-  #    - "5001:5001"
-  #  env_file:
-  #    - .env
-  #  depends_on:
-  #    - mysql_db
-  #  networks:
-  #    - mynetwork
 
   ms-cart:
     build: ./ms-cart
@@ -33,13 +22,25 @@ services:
     networks:
       - mynetwork
 
+  ms-inventory:
+    build: ./ms-inventory
+    ports:
+      - "5003:5003"
+    env_file:
+      - .env
+    depends_on:
+      - mysql_db
+    networks:
+      - mynetwork
+
+
   api-gateway:
     build: ./api-gateway
     ports:
       - "5000:5000"
     
     depends_on:
-      - ms-cart
+      - ms-catalog
     networks:
       - mynetwork
 

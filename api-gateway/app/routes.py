@@ -4,7 +4,7 @@ api_gateway = Blueprint('api_gateway', __name__)
 
 CART_SERVICE_URL='http://ms-cart:5004/purchase'
 
-CATALOGO_SERVICE_URL = 'http://ms-catalogo:5001/catalogo'
+CATALOGO_SERVICE_URL = 'http://ms-catalog:5001/catalogo'
 
 
 @api_gateway.route('/productos', methods=['GET'])
