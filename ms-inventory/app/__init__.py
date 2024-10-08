@@ -1,5 +1,5 @@
 from flask import Flask
-from models import db
+from .models import db
 from .routes import inventory_bp
 from .config import Config
 
