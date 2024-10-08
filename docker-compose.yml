@@ -1,6 +1,5 @@
 services:
 
-  
   ms-catalogo:
     build: ./ms-catalogo
     ports:
