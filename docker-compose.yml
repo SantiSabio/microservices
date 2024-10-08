@@ -1,8 +1,21 @@
 services:
+
+  
+  ms-catalogo:
+    build: ./ms-catalogo
+    ports:
+      - "5001:5001"
+    env_file:
+      - .env
+    depends_on:
+      - mysql_db
+    networks:
+      - mynetwork
+
   ms-cart:
     build: ./ms-cart
     ports:
-      - "5004:5004"
+      - "5002:5002"
     env_file:
       - .env
     depends_on:
@@ -36,6 +49,8 @@ services:
 volumes:
   mysql_data:
 
+
 networks:
   mynetwork:
     driver: bridge
+

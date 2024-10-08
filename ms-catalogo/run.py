@@ -1,12 +1,12 @@
-#ms-cart/run.py
+#ms-catalogo/run.py
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from app import create_app, db
 
 app = create_app()
-if __name__ == '__main__':
 
-    app.run(host='0.0.0.0', port=5004)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5001)
 
 
 @app.cli.command("create-db")

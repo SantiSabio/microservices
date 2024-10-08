@@ -1,4 +1,4 @@
-#catalogo/app/models.py
+#ms-catalogo/app/models.py
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
