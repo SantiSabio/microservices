@@ -13,6 +13,3 @@ class TestInventoryRoutes(unittest.TestCase):
             "entrada_salida": 1
         })
         self.assertEqual(response.status_code, 200)
-
-# Test Docker:
-# docker exec -it microservices-api-gateway-1 python -m unittest discover -s tests
