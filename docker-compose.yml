@@ -1,4 +1,6 @@
 services:
+
+  
   ms-catalogo:
     build: ./ms-catalogo
     ports:
@@ -21,15 +23,13 @@ services:
     networks:
       - mynetwork
 
-
   api-gateway:
     build: ./api-gateway
     ports:
       - "5000:5000"
-    env_file:
-      - .env
+    
     depends_on:
-      - ms-catalogo
+      - ms-cart
     networks:
       - mynetwork
 
@@ -42,12 +42,15 @@ services:
       MYSQL_DATABASE: catalogodb
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./mysql/db_query.sql:/docker-entrypoint-initdb.d/db_query.sql
     networks:
       - mynetwork
 
 volumes:
   mysql_data:
 
+
 networks:
   mynetwork:
     driver: bridge
+

@@ -12,6 +12,13 @@ def create_app():
 
     db.init_app(app)
 
+    with app.app_context():
+        # Importa tus modelos aquí
+        from .models import Purchase  # Asegúrate de que el nombre del modelo sea correcto
+        
+        # Crea las tablas
+        db.create_all()
+
     from .routes import cart
     app.register_blueprint(cart)
     

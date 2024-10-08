@@ -1,14 +1,13 @@
-#api-gateway/app/routes.py
-from flask import Blueprint, jsonify, request
-import requests
 
+
+from flask import Blueprint, jsonify, request  # Importa request
+import requests
 api_gateway = Blueprint('api_gateway', __name__)
 
-# URL con la que nos comunicamos al microservicio de catálogo
+CART_SERVICE_URL='http://ms-cart:5004/purchase'
+
 CATALOGO_SERVICE_URL = 'http://ms-catalogo:5001/catalogo'
 
-# URL con la que nos comunicamos al microservicio de comparas
-CART_SERVICE_URL='http://ms-cart:5002/purchase'
 
 @api_gateway.route('/productos', methods=['GET'])
 def obtener_productos():
@@ -41,5 +40,7 @@ def add_purchase():
         response.raise_for_status()  # Lanza una excepción si hay un error HTTP
     except requests.exceptions.RequestException as e:
         return jsonify({'error': str(e)}), 500
+
+
 
     return jsonify(response.json()), response.status_code
