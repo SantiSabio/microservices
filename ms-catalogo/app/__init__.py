@@ -1,18 +1,16 @@
-#ms-catalogo/app/__init__.py
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-import os
-
-db = SQLAlchemy()
+from .models import db
+from .routes import inventory_bp
+from .config import Config
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:password@mysql_db:3306/catalogodb'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config.from_object(Config)
 
     db.init_app(app)
+    with app.app_context():
+        db.create_all()
 
-    from .routes import catalogo
-    app.register_blueprint(catalogo)
-    
+    app.register_blueprint(inventory_bp, url_prefix='/inventory')
+
     return app

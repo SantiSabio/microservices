@@ -1,21 +1,21 @@
-#ms-catalogo/app/routes.py
-from flask import Blueprint, jsonify, request
-from .models import Product
+from flask import Blueprint, request, jsonify
+# from .models import db, Stock
+from .services import update_stock
 
-catalogo = Blueprint('catalogo', __name__)
+inventory_bp = Blueprint('inventory', __name__)
 
+@inventory_bp.route('/update', methods=['POST'])
+def update_stock_route():
+    data = request.json
+    producto_id = data.get('producto_id')
+    cantidad = data.get('cantidad')
+    entrada_salida = data.get('entrada_salida')
 
-@catalogo.route('/catalogo', methods=['GET'])
-def get_catalogo():
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
-    
-    products = Product.query.paginate(page=page, per_page=per_page)
-    product_list = [{"id": p.id, "name": p.name, "price": p.price, "stock": p.stock} for p in products.items]
-    
-    return jsonify({
-        "products": product_list,
-        "total": products.total,
-        "pages": products.pages,
-        "current_page": products.page
-    })
+    if not producto_id or not cantidad or not entrada_salida:
+        return jsonify({"error": "Datos incompletos"}), 400
+
+    try:
+        stock = update_stock(producto_id, cantidad, entrada_salida)
+        return jsonify({"success": True, "stock_id": stock.id}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
