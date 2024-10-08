@@ -8,7 +8,7 @@ api_gateway = Blueprint('api_gateway', __name__)
 CATALOGO_SERVICE_URL = 'http://ms-catalogo:5001/catalogo'
 
 # URL con la que nos comunicamos al microservicio de comparas
-CART_SERVICE_URL='http://ms-cart:5004/purchase'
+CART_SERVICE_URL='http://ms-cart:5002/purchase'
 
 @api_gateway.route('/productos', methods=['GET'])
 def obtener_productos():
@@ -35,7 +35,7 @@ def add_purchase():
         return jsonify({'error': 'Missing fields'}), 400
     
     # Reenviar la solicitud al microservicio ms-cart
-    url = 'http://ms-cart:5004/purchase'
+    url = 'http://ms-cart:5002/purchase'
     try:
         response = requests.post(url, json=request.json)
         response.raise_for_status()  # Lanza una excepción si hay un error HTTP

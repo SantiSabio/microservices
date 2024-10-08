@@ -3,3 +3,25 @@ En esta ruta deberia devolver los productos que esten en el catalogo
 
 http://127.0.0.1:5001/catalogo
 En esta ruta deberia devolver los productos que esten en el catalogo
+
+docker exec -it microservices-api-gateway-1 python -m unittest discover -s tests
+
+docker exec -it microservices-ms-catalogo-1 python -m unittest discover -s tests
+
+curl http://localhost:5000/productos
+
+curl http://localhost:5001/catalogo   
+
+docker-compose up -d --build   
+
+docker-compose down
+
+docker ps
+
+docker logs microservices-mysql_db-1 
+
+docker logs microservices-api-gateway-1
+
+docker logs microservices-ms-catalogo-1
+
+docker logs microservices-ms-cart-1
