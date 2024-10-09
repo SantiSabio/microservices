@@ -20,13 +20,14 @@ CREATE TABLE purchase (
     purchase_date DATETIME,
     purchase_direction VARCHAR(255) NOT NULL) ;
 
--- Tabla 'payments'
-CREATE TABLE payments (
-    id_payments INT AUTO_INCREMENT PRIMARY KEY,
+-- Tabla 'payment'
+CREATE TABLE payment (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
-    price FLOAT,
-    payment_method VARCHAR(80),
-    FOREIGN KEY (product_id) REFERENCES products(id_producto)
+    quantity INT NOT NULL,
+    price FLOAT NOT NULL,
+    purchase_id INT NOT NULL,
+    payment_method VARCHAR(80)NOT NULL
 );
 
 -- Tabla 'stocks'

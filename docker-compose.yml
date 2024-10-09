@@ -1,5 +1,18 @@
 services:
 
+  mysql_db:
+    image: mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: catalogodb
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/db_query.sql:/docker-entrypoint-initdb.d/db_query.sql
+    networks:
+      - mynetwork
+
   ms-catalog:
     build: ./ms-catalog
     ports:
@@ -33,6 +46,17 @@ services:
     networks:
       - mynetwork
 
+  ms-payment:
+    build: ./ms-payment
+    ports:
+      - "5004:5004"
+    env_file:
+      - .env
+    depends_on:
+      - mysql_db
+    networks:
+      - mynetwork
+
 
   api-gateway:
     build: ./api-gateway
@@ -44,18 +68,7 @@ services:
     networks:
       - mynetwork
 
-  mysql_db:
-    image: mysql
-    ports:
-      - "3307:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: catalogodb
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./mysql/db_query.sql:/docker-entrypoint-initdb.d/db_query.sql
-    networks:
-      - mynetwork
+
 
 volumes:
   mysql_data:
