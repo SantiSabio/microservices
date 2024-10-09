@@ -25,3 +25,37 @@ docker logs microservices-api-gateway-1
 docker logs microservices-ms-catalogo-1
 
 docker logs microservices-ms-cart-1
+
+
+# Levantamos los contenedores
+
+docker-compose up -d
+
+# nos conectamos al contenedor MySQL
+
+docker exec -it microservices-mysql_db-1 mysql -u root -p
+
+USE catalogodb;
+SHOW TABLES;
+
+-- Insertar datos de prueba en 'products'
+INSERT INTO products (name_product, price, is_active) VALUES
+('Laptop', 1500.50, TRUE),
+('Smartphone', 700.99, TRUE),
+('Tablet', 350.75, TRUE);
+
+-- Insertar datos de prueba en 'purchase'
+INSERT INTO purchase (product_id, purchase_date, purchase_direction) VALUES
+(1, NOW(), '123 Main St, Cityville'),
+(2, NOW(), '456 Oak Ave, Townsville');
+
+-- Insertar datos de prueba en 'payment'
+INSERT INTO payment (product_id, quantity, price, purchase_id, payment_method) VALUES
+(1, 1, 1500.50, 1, 'Credit Card'),
+(2, 1, 700.99, 2, 'PayPal');
+
+-- Insertar datos de prueba en 'stocks'
+INSERT INTO stocks (product_id, stock_quantity) VALUES
+(1, 50),
+(2, 30),
+(3, 20);

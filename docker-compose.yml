@@ -9,7 +9,7 @@ services:
       MYSQL_DATABASE: catalogodb
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./mysql/db_query.sql:/docker-entrypoint-initdb.d/db_query.sql
+      - ./mysql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
     networks:
       - mynetwork
 

@@ -11,8 +11,8 @@ def get_catalogo():
     per_page = request.args.get('per_page', 10, type=int)
     
     products = Product.query.paginate(page=page, per_page=per_page)
-    product_list = [{"id": p.id, "name": p.name, "price": p.price, "stock": p.stock} for p in products.items]
-    
+    product_list = [{"id": p.id, "name": p.name, "price": p.price, "is_active": p.is_active} for p in products.items]
+
     return jsonify({
         "products": product_list,
         "total": products.total,

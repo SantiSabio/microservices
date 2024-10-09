@@ -6,7 +6,7 @@ microservices/
 │   ├── Dockerfile
 │   ├──requirements.txt
 │   └── run.py
-├── catalog/
+├── ms-cart/
 │   ├── app/
 │   │   ├── __init__.py
 │   │   ├── models.py
@@ -14,8 +14,34 @@ microservices/
 │   ├── Dockerfile
 │   ├──requirements.txt
 │   └── run.py
+├── ms-catalog/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── routes.py
+│   ├── Dockerfile
+│   ├──requirements.txt
+│   └── run.py
+├── ms-inventory/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── routes.py
+│   ├── Dockerfile
+│   ├──requirements.txt
+│   └── run.py
+├── ms-payment/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── routes.py
+│   ├── Dockerfile
+│   ├──requirements.txt
+│   └── run.py
+├── docker-entrypoint-initdb.d/
+│   └── db_query.sql
 ├── docs/
-│   ├── estructura.txt
+│   └── estructura.txt
 ├── docker-compose.yml
 ├── README.md
 └── .env
