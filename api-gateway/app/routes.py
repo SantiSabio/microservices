@@ -23,6 +23,7 @@ def create_order(data):
         'pay_method': data['pay_method'],
         'address': data['address']
     }
+    # Construir saga
     saga = build_saga(saga_context)
     order_result = execute_saga(saga)
 

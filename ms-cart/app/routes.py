@@ -1,12 +1,12 @@
 #ms-cart/app/routes.py
 from datetime import datetime
 from flask import Blueprint, request,jsonify
-from .models import db, Purchase
+from models import db, Purchase
 
 cart = Blueprint('cart', __name__)
 
 # Ruta para manejar la creación de compras
-@cart.route('/purchase', methods=['POST'])
+@cart.route('/purchase/add', methods=['POST'])
 def add_purchase():
     data = request.get_json()
 
@@ -27,7 +27,9 @@ def add_purchase():
         db.session.add(new_purchase)
         db.session.commit()
 
-        return jsonify({'message': 'Purchase added successfully'}), 201
+        return jsonify({
+            'message': 'Purchase added successfully',
+            'purchase_id': new_purchase.id_purchase}), 201
     except Exception as e:
-        db.session.rollback()  # Hacer rollback en caso de error
+        db.session.rollback()  # Rollback en caso de error
         return jsonify({'error': str(e)}), 500
