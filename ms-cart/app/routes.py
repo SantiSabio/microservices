@@ -33,3 +33,26 @@ def add_purchase():
     except Exception as e:
         db.session.rollback()  # Rollback en caso de error
         return jsonify({'error': str(e)}), 500
+
+def remove_purchase():
+    data = request.get_json()
+
+    if not 'purchase_id' in data:
+        return jsonify({'error': 'Missing fields'}, 400)
+    
+    try:
+        # Buscar la compra
+        purchase = Purchase.query.get(data['purchase_id'])
+        
+        if not purchase:
+            return jsonify({'error': 'Purchase not found'}), 404
+        
+        # Eliminar el pago encontrado
+        db.session.delete(purchase)
+        db.session.commit()
+        return jsonify({'message': 'Purchase removed succesfully'}), 200
+    except Exception as e:
+        db.session.rollback()  # Hacer rollback en caso de error
+        return jsonify({'error': str(e)}), 500
+
+        
