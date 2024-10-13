@@ -8,22 +8,24 @@ def build_saga(saga_context):
     # Pasos de la saga a construir
     return SagaBuilder.create() \
         .action(
-            lambda: add_purchase(saga_context['product_id'], saga_context['purchase_address']),
-            # ---
-            lambda: remove_purchase(saga_context['product_id'], saga_context['purchase_address'])
+            # Guardar 'purchase_id' devuelto por 'add_purchase' en 'saga_context'
+            lambda: saga_context.update({'purchase_id': add_purchase(saga_context['product_id'], saga_context['address'])}),
+            # Usar 'purchase_id' para remover la compra
+            lambda: remove_purchase(saga_context['purchase_id'])
         ) \
         .action(
-            lambda: register_payment(saga_context['user_id'], saga_context['total']),
-            lambda: remove_payment(saga_context['user_id'], saga_context['total'])
+            lambda: saga_context.update({'payment_id': add_payment(saga_context['product_id'], saga_context['pay_method'])}),
+            lambda: remove_payment(saga_context['payment_id'])
         ) \
         .action(
-            lambda: add_stock(saga_context['product_id']),
+            lambda: saga_context.update({'stock_id': update_stock(saga_context['product_id'], saga_context['ammount'], saga_context['in_out'])}),
             lambda: remove_stock(saga_context['product_id'])
+        ) \
         .action(
             lambda: success()
-        )
         ) \
         .build()
+
 
 def execute_saga(saga):
     # Ejecutar la Saga
