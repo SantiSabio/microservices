@@ -13,6 +13,18 @@ services:
     networks:
       - mynetwork
 
+  redis:
+    image: redis
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+    networks:
+      - mynetwork
+
+
   ms-catalog:
     build: ./ms-catalog
     ports:
@@ -72,6 +84,7 @@ services:
 
 volumes:
   mysql_data:
+  redis_data:
 
 
 networks:

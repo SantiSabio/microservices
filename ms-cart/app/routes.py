@@ -2,7 +2,7 @@
 from datetime import datetime
 from flask import Blueprint, request,jsonify
 from models import db, Purchase
-
+import r,json
 cart = Blueprint('cart', __name__)
 
 # Ruta para manejar la creación de compras
@@ -22,6 +22,16 @@ def add_purchase():
             purchase_date=datetime.strptime(data['purchase_date'], '%Y-%m-%d'),
             purchase_direction=data['purchase_direction']
         )
+
+        purchase_data = {
+                'id_purchase': new_purchase.id_purchase,
+                'product_id': new_purchase.product_id,
+                'purchase_date': new_purchase.purchase_date.strftime('%Y-%m-%d'),
+                'purchase_direction': new_purchase.purchase_direction
+            }
+        r.set(f"purchase:{new_purchase.id_purchase}", json.dumps(purchase_data), ex=3600)
+
+
 
         # Agregar la nueva compra a la base de datos
         db.session.add(new_purchase)
