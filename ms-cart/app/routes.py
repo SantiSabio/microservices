@@ -29,6 +29,7 @@ def add_purchase():
                 'purchase_date': new_purchase.purchase_date.strftime('%Y-%m-%d'),
                 'purchase_direction': new_purchase.purchase_direction
             }
+        
         r.set(f"purchase:{new_purchase.id_purchase}", json.dumps(purchase_data), ex=3600)
 
 

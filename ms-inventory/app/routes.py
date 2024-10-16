@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from models import Stock, db
-
+import r,json
 inventory_bp = Blueprint('inventory', __name__)
 
 @inventory_bp.route('/update', methods=['POST'])
@@ -18,6 +18,16 @@ def update_stock():
             cantidad=data['ammount'],
             entrada_salida=data['in_out']
         )
+
+        stock_data = {
+            'stock_id': new_stock.id_stock,  # Suponiendo que este es el ID autoincremental del stock
+            'product_id': new_stock.producto_id,
+            'amount': new_stock.cantidad,
+            'in_out': new_stock.entrada_salida}
+        
+        r.set(f"purchase:{stock_data.id_purchase}", json.dumps(stock_data), ex=3600)
+
+
         db.session.add(new_stock)
         db.session.commit()
         return jsonify({'message': 'Stock updated successfully'}), 201
