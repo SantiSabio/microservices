@@ -1,17 +1,7 @@
-'''
-Saga 'product_order'
-Los datos se recibirán de un formulario
-1. purchase: se envían los datos de la compra a ms-cart.
-2. payment: se envían los datos de pago a ms-payment.
-3. stock: se envían los datos de actualización de stock a ms-inventory.
-4. Se devuelve el mensaje de finalización al usuario.
-'''
-
-from flask import jsonify, request
+from flask import jsonify
 from services import response_from_url
 
 # Paso 1: Enviar los datos de compra a ms-purchase
-# TODO: Refactoizar
 def add_purchase(product_id, address):
     # Recibir datos de compra en json, y colocarlos en el contexto
     purchase_data = {
@@ -36,7 +26,6 @@ def remove_purchase(purchase_id):
     return response_from_url(remove_purchase_url, purchase_data) # Será 200 o una excepción
 
 # Paso 2: Enviar los datos de pago a ms-payment
-# ---
 def add_payment(product_id, pay_method):
     # Recibir los datos de pago
     payment_data = {
