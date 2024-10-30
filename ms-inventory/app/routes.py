@@ -1,7 +1,16 @@
 from flask import Blueprint, request, jsonify
-from models import Stock, db
-import r,json
+from app.models import Stock
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from app.config import Config
+
 inventory_bp = Blueprint('inventory', __name__)
+
+# Configuración de la base de datos
+engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
+Session = sessionmaker(bind=engine)
+session = Session()
 
 @inventory_bp.route('/update', methods=['POST'])
 def update_stock():
@@ -13,47 +22,27 @@ def update_stock():
         return jsonify({'error': 'Missing fields'}), 400
     
     try:
-        new_stock = Stock(
-            producto_id=data['product_id'],
-            cantidad=data['ammount'],
-            entrada_salida=data['in_out']
-        )
+        # Iniciar una transacción
+        with session.begin():
+            # Bloquear la fila del stock para evitar modificaciones concurrentes
+            stock_item = session.query(Stock).with_for_update().filter_by(product_id=data['product_id']).first()
+            
+            if not stock_item:
+                return jsonify({'error': 'Stock not found'}), 404
+            
+            # Actualizar la cantidad de stock
+            if data['in_out'] == 'out':
+                if stock_item.quantity < data['ammount']:
+                    return jsonify({'error': 'Insufficient stock'}), 400
+                stock_item.quantity -= data['ammount']
+            elif data['in_out'] == 'in':
+                stock_item.quantity += data['ammount']
+            else:
+                return jsonify({'error': 'Invalid in_out value'}), 400
+            
+            session.commit()
 
-        stock_data = {
-            'stock_id': new_stock.id_stock,  # Suponiendo que este es el ID autoincremental del stock
-            'product_id': new_stock.producto_id,
-            'amount': new_stock.cantidad,
-            'in_out': new_stock.entrada_salida}
-        
-        r.set(f"purchase:{stock_data.id_purchase}", json.dumps(stock_data), ex=3600)
-
-
-        db.session.add(new_stock)
-        db.session.commit()
-        return jsonify({'message': 'Stock updated successfully'}), 201
-    except Exception as e:
-        db.session.rollback()
-        raise e
-    
-@inventory_bp.route('/remove', methods=['POST'])
-def remove_stock():
-    data = request.get_json()
-    
-    if not 'stock_id' in data:
-        return jsonify({'error': 'Missing fields'}), 400
-    
-    try:
-        # Buscar el stock
-        old_stock = Stock.query.get(data['stock_id'])
-        
-        if not old_stock:
-            return jsonify({'error': 'Stock not found'}), 404
-        
-        # Eliminar el pago encontrado
-        db.session.delete(old_stock)
-        db.session.commit()
-
-        return jsonify({'message': 'Stock removed successfully'}), 200
-    except Exception as e:
-        db.session.rollback()  # Hacer rollback en caso de error
+        return jsonify({'message': 'Stock updated successfully'}), 200
+    except SQLAlchemyError as e:
+        session.rollback()  # Hacer rollback en caso de error
         return jsonify({'error': str(e)}), 500
