@@ -1,7 +1,7 @@
 #ms-payment/app/routes.py
 from flask import Blueprint, request,jsonify
-from models import db, Payment
-from app import r
+from .models import db, Payment
+from app import Config
 import json
 
 payment = Blueprint('payment', __name__)
@@ -36,7 +36,7 @@ def add_payment():
         'payment_method': new_payment.payment_method
     }
 
-        r.set(f"purchase:{payment_data.id_purchase}", json.dumps(payment_data), ex=3600)
+        Config.r.set(f"purchase:{payment_data.id_purchase}", json.dumps(payment_data), ex=3600)
 
 
         # Agregar nuevo pago a la base de datos

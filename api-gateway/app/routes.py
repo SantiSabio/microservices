@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from services import build_saga, execute_saga
+from app.services import build_saga, execute_saga
 
 api_gateway = Blueprint('api_gateway', __name__)
 

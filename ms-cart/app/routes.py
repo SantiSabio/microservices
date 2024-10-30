@@ -1,8 +1,9 @@
 #ms-cart/app/routes.py
 from datetime import datetime
 from flask import Blueprint, request,jsonify
-from models import db, Purchase
-import r,json
+from app.models import db, Purchase
+from app import Config
+import json
 cart = Blueprint('cart', __name__)
 
 # Ruta para manejar la creación de compras
@@ -30,7 +31,7 @@ def add_purchase():
                 'purchase_direction': new_purchase.purchase_direction
             }
         
-        r.set(f"purchase:{new_purchase.id_purchase}", json.dumps(purchase_data), ex=3600)
+        Config.r.set(f"purchase:{new_purchase.id_purchase}", json.dumps(purchase_data), ex=3600)
 
 
 

@@ -1,7 +1,7 @@
 #api-gateway/app/__init__.py
 import redis
 from flask import Flask
-from routes import api_gateway
+from app.routes import api_gateway
 
 
 
