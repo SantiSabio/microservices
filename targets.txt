@@ -1,7 +1,7 @@
 POST http://localhost:5003/update
 Content-Type: application/json
 {
-  "product_id": "123",
+  "product_id": "1",
   "ammount": 1,
   "in_out": "out"
 }

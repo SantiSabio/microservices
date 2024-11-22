@@ -13,6 +13,17 @@ services:
     networks:
       - mynetwork
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql_db
+      MYSQL_ROOT_PASSWORD: password
+    networks:
+      - mynetwork
+
   redis:
     image: redis
     container_name: redis_cache
@@ -24,13 +35,14 @@ services:
     networks:
       - mynetwork
 
-
   ms-catalog:
     build: ./ms-catalog
     ports:
       - "5001:5001"
     env_file:
       - .env
+    volumes:
+      - ./ms-catalog:/app
     depends_on:
       - mysql_db
     networks:
@@ -42,6 +54,8 @@ services:
       - "5002:5002"
     env_file:
       - .env
+    volumes:
+      - ./ms-cart:/app
     depends_on:
       - mysql_db
     networks:
@@ -53,6 +67,8 @@ services:
       - "5003:5003"
     env_file:
       - .env
+    volumes:
+      - ./ms-inventory:/app
     depends_on:
       - mysql_db
     networks:
@@ -64,30 +80,31 @@ services:
       - "5004:5004"
     env_file:
       - .env
+    volumes:
+      - ./ms-payment:/app
     depends_on:
       - mysql_db
     networks:
       - mynetwork
 
-
   api-gateway:
     build: ./api-gateway
     ports:
       - "5000:5000"
-    
+    volumes:
+      - ./api-gateway:/app
     depends_on:
       - ms-catalog
+      - ms-cart
+      - ms-inventory
+      - ms-payment
     networks:
       - mynetwork
-
-
 
 volumes:
   mysql_data:
   redis_data:
 
-
 networks:
   mynetwork:
     driver: bridge
-
