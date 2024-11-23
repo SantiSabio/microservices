@@ -1,21 +1,24 @@
 #ms-payment/app/routes.py
 from flask import Blueprint, request,jsonify
 from .models import db, Payment
+from app import Config
+import json
 
 payment = Blueprint('payment', __name__)
 
 # Ruta para manejar la creación de compras
-@payment.route('/finish', methods=['POST'])
+@payment.route('/payment/add', methods=['POST'])
 def add_payment():
+    # Se reciben los datos de pago
     data = request.get_json()
-
     # Validar que los datos necesarios estén presentes
-    required_fields = ['product_id', 'quantity', 'price','purchase_id','payment_method']
+    required_fields = ['product_id', 'price', 'payment_method']
+
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing fields'}), 400
     
     try:
-        # Crear una nueva compra
+        # Crea un nuevo pago
         new_payment = Payment(
             product_id=data['product_id'],
             quantity=data['quantity'],
@@ -24,11 +27,47 @@ def add_payment():
             payment_method=data['payment_method']
         )
 
-        # Agregar la nueva compra a la base de datos
+        payment_data = {
+        'payment_id': new_payment.id_payment,
+        'product_id': new_payment.product_id,
+        'quantity': new_payment.quantity,
+        'price': new_payment.price,
+        'purchase_id': new_payment.purchase_id,
+        'payment_method': new_payment.payment_method
+    }
+
+        Config.r.set(f"purchase:{payment_data.id_purchase}", json.dumps(payment_data), ex=3600)
+
+
+        # Agregar nuevo pago a la base de datos
         db.session.add(new_payment)
         db.session.commit()
 
-        return jsonify({'message': 'Purchase added successfully'}), 201
+        return jsonify({'message': 'Payment added successfully'}), 201
+    except Exception as e:
+        db.session.rollback()  # Hacer rollback en caso de error
+        return jsonify({'error': str(e)}), 500
+    
+@payment.route('/payment/remove', methods=['POST'])
+def remove_payment():
+    # Se reciben los datos de pago a borrar
+    data = request.get_json()
+    
+    if not 'payment_id' in data:
+        return jsonify({'error': 'Missing fields'}), 400
+    
+    try:
+        # Buscar el pago
+        old_payment = Payment.query.get(data['payment_id'])
+        
+        if not old_payment:
+            return jsonify({'error': 'Payment not found'}), 404
+        
+        # Eliminar el pago encontrado
+        db.session.delete(old_payment)
+        db.session.commit()
+
+        return jsonify({'message': 'Payment removed successfully'}), 200
     except Exception as e:
         db.session.rollback()  # Hacer rollback en caso de error
         return jsonify({'error': str(e)}), 500

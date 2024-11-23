@@ -1,66 +1,44 @@
-from flask import Blueprint, jsonify, request  # Importa request
-import requests
+from flask import Blueprint, jsonify, request
+from app.services import build_saga, execute_saga
+
 api_gateway = Blueprint('api_gateway', __name__)
 
-CART_SERVICE_URL='http://ms-cart:5002/purchase'
+CATALOG_SERVICE_URL = 'http://ms-catalog:5001/catalog'
+PURCHASE_SERVICE_URL = 'http://ms-purchase:5002/purchase'
+PAYMENT_SERVICE_URL = 'http://ms-payment:5004/payment'
+STOCK_SERVICE_URL = 'http://ms-inventory:5004/stock'
 
-CATALOGO_SERVICE_URL = 'http://ms-catalog:5001/catalogo'
+# Comenzar orden
+@api_gateway.route('/order', methods=['POST'])
+def create_order(data):
+    # Obtener datos de la orden
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Datos de compra inválidos'}), 400
 
-PAYMENT_SERVICE_URL= 'http://ms-payment:5004/finish'
+    # Crear el contexto de la saga
+    saga_context = {
+        'product_id': data['product_id'],
+        'ammount': data['ammount'],
+        'pay_method': data['pay_method'],
+        'address': data['address']
+    }
+    # Construir saga
+    saga = build_saga(saga_context)
+    order_result = execute_saga(saga)
 
-@api_gateway.route('/productos', methods=['GET'])
-def obtener_productos():
-    try:
-        # solicitud GET al microservicio de catálogo
-        response = requests.get(CATALOGO_SERVICE_URL)
-        
-        # verificamos si la solicitud fue exitosa
-        if response.status_code == 200:
-            productos = response.json()
-            return jsonify(productos), 200
-        else:
-            # si hay un error, retornara el código de estado del microservicio
-            return jsonify({"error": "Error al obtener productos del catálogo"}), response.status_code
-    except requests.exceptions.RequestException as e:
-        # en caso de error en la solicitud, devuelve un error 500
-        return jsonify({"error": str(e)}), 500
-
-@api_gateway.route('/purchase', methods=['POST'])
-def add_purchase():
-    # Validar que los datos necesarios estén presentes en la solicitud
-    required_fields = ['product_id', 'purchase_date', 'purchase_direction']
-    if not all(field in request.json for field in required_fields):
-        return jsonify({'error': 'Missing fields'}), 400
+    return order_result
     
-    # Reenviar la solicitud al microservicio ms-cart
-    url = 'http://ms-cart:5002/purchase'
-    try:
-        response = requests.post(url, json=request.json)
-        response.raise_for_status()  # Lanza una excepción si hay un error HTTP
-    except requests.exceptions.RequestException as e:
-        return jsonify({'error': str(e)}), 500
+# Consultar catálogo
+# @app.route('/catalog', methods=['GET'])
+# El usuario busca por 'product_id' y obtiene los atributos del producto
+# def search_product(id):
+# get_product_url = CATALOG_SERVICE_URL
 
-
-
-    return jsonify(response.json()), response.status_code
-
-
-@api_gateway.route('/payment', methods=['POST'])
-def add_payment():
-    # Validar que los datos necesarios estén presentes en la solicitud
-    required_fields = ['product_id', 'quantity', 'price','purchase_id','payment_method']
-
-    if not all(field in request.json for field in required_fields):
-        return jsonify({'error': 'Missing fields'}), 400
+    # try:
+    #     response = requests.post(get_product_url, json=product)
+    #     response.raise_for_status()
+    # except requests.exceptions.RequestException as e:
+    #     return jsonify({'error': str(e)}), 500
     
-    # Reenviar la solicitud al microservicio ms-cart
-    url = 'http://ms-payment:5004/finish'
-    try:
-        response = requests.post(url, json=request.json)
-        response.raise_for_status()  # Lanza una excepción si hay un error HTTP
-    except requests.exceptions.RequestException as e:
-        return jsonify({'error': str(e)}), 500
-
-
-
-    return jsonify(response.json()), response.status_code
+    # return jsonify(response.json()), response.status_code

@@ -18,4 +18,3 @@ G -[dashed]-> DB : (4.a) Actualiza el estado de la compra
 A -> I : (5) Actualiza stock
 I -[dashed]-> DB : (5.a) Actualiza el stock
 @enduml
-

@@ -1,8 +1,10 @@
 #ms-catalogo/app/routes.py
 from flask import Blueprint, jsonify, request
 from .models import Product
-
+from app.config import Config
+import json
 catalogo = Blueprint('catalogo', __name__)
+
 
 
 @catalogo.route('/catalogo', methods=['GET'])
@@ -12,6 +14,11 @@ def get_catalogo():
     
     products = Product.query.paginate(page=page, per_page=per_page)
     product_list = [{"id": p.id, "name": p.name, "price": p.price, "is_active": p.is_active} for p in products.items]
+
+    for product in product_list:
+        product_key = f"product:{product['id']}"
+        Config.r.client.set(product_key, json.dumps(product), ex=3600)  
+
 
     return jsonify({
         "products": product_list,
