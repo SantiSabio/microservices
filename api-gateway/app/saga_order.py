@@ -1,5 +1,5 @@
 from flask import jsonify
-from services import response_from_url
+from app.utils import response_from_url
 
 # Paso 1: Enviar los datos de compra a ms-purchase
 def add_purchase(product_id, address):
@@ -76,3 +76,6 @@ def remove_stock(stock_id):
 # Paso 4: Saga completada
 def success():
     return jsonify({'message': "Compra realizada con éxito."}), 201
+
+
+

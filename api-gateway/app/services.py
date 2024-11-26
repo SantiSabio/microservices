@@ -1,6 +1,6 @@
 import requests
 from saga import SagaBuilder, SagaError
-from saga_order import add_purchase, remove_purchase, add_payment, remove_payment, update_stock, remove_stock, success
+from app.saga_order import add_purchase, remove_purchase, add_payment, remove_payment, update_stock, remove_stock, success
 from flask import jsonify
 
 # Crear la saga ('context' será el conjunto de datos obtenidos al solicitar la creación de la orden)
