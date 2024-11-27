@@ -59,3 +59,11 @@ INSERT INTO stocks (product_id, stock_quantity) VALUES
 (1, 50),
 (2, 30),
 (3, 20);
+
+-- Pruebas de stock no negativo--
+Al ejecutar en el terminal usando el product_id y la cantidad a comprar ( out) y si se agrega (in) podemos hacer pruebas sobre la base de datos
+para que no permita llegar a un stock negativo
+
+for ($i=1; $i -le 10; $i++) {
+>>     Invoke-RestMethod -Uri http://localhost:5003/inventory/update -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"product_id": 1, "ammount": 9, "in_out": "out"}'
+>> }
