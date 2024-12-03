@@ -26,11 +26,11 @@ def remove_purchase(purchase_id):
     return response_from_url(remove_purchase_url, purchase_data) # Será 200 o una excepción
 
 # Paso 2: Enviar los datos de pago a ms-payment
-def add_payment(product_id, pay_method):
+def add_payment(product_id, payment_method):
     # Recibir los datos de pago
     payment_data = {
         'product_id': product_id,
-        'pay_method': pay_method
+        'pay_method': payment_method
     }
     
     add_payment_url = 'http://ms-payment:5004/payment/add'

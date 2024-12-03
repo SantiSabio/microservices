@@ -1,3 +1,7 @@
+import requests
+from flask import jsonify
+
+
 # Obtiene la respuesta (o excepción) al enviar una solicitud a una url (microservicio)
 def response_from_url(url, data):
 

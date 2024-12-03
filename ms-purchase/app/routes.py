@@ -1,4 +1,4 @@
-#ms-cart/app/routes.py
+#ms-purchase/app/routes.py
 from datetime import datetime
 from flask import Blueprint, request,jsonify
 from app.models import db, Purchase
@@ -12,13 +12,13 @@ breaker = CircuitBreaker(fail_max=10, reset_timeout=10)
 
 
 #Definicion del Blueprint
-cart = Blueprint('cart', __name__)
+purchase = Blueprint('purchase', __name__)
 
 
 
 
 # Ruta para manejar la creación de compras
-@cart.route('/purchase/add', methods=['POST'])
+@purchase.route('/purchase/add', methods=['POST'])
 @breaker
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 def add_purchase():
@@ -66,7 +66,7 @@ def add_purchase():
 
 
 
-@cart.route('/purchase/remove', methods=['POST'])
+@purchase.route('/purchase/remove', methods=['POST'])
 @breaker
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 #Ruta para manejar la eliminacion de una compra

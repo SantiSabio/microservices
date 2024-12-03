@@ -10,7 +10,7 @@ PAYMENT_SERVICE_URL = 'http://ms-payment:5004/payment'
 
 # Comenzar orden
 @api_gateway.route('/order', methods=['POST'])
-def create_order(data):
+def create_order():
     # Obtener datos de la orden
     data = request.get_json()
     if not data:
@@ -20,8 +20,8 @@ def create_order(data):
     saga_context = {
         'product_id': data['product_id'],
         'ammount': data['ammount'],
-        'pay_method': data['pay_method'],
-        'address': data['address']
+        'payment_method': data['payment_method'],
+        'purchase_direction': data['purchase_direction']
     }
     # Construir saga
     saga = build_saga(saga_context)
@@ -29,16 +29,3 @@ def create_order(data):
 
     return order_result
     
-# Consultar catálogo
-# @app.route('/catalog', methods=['GET'])
-# El usuario busca por 'product_id' y obtiene los atributos del producto
-# def search_product(id):
-# get_product_url = CATALOG_SERVICE_URL
-
-    # try:
-    #     response = requests.post(get_product_url, json=product)
-    #     response.raise_for_status()
-    # except requests.exceptions.RequestException as e:
-    #     return jsonify({'error': str(e)}), 500
-    
-    # return jsonify(response.json()), response.status_code

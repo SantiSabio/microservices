@@ -49,14 +49,14 @@ services:
     networks:
       - mynetwork
 
-  ms-cart:
-    build: ./ms-cart
+  ms-purchase:
+    build: ./ms-purchase
     ports:
       - "5002:5002"
     env_file:
       - .env
     volumes:
-      - ./ms-cart:/app
+      - ./ms-purchase:/app
     depends_on:
       - mysql_db
       - redis
@@ -99,7 +99,7 @@ services:
       - ./api-gateway:/app
     depends_on:
       - ms-catalog
-      - ms-cart
+      - ms-purchase
       - ms-inventory
       - ms-payment
     networks:

@@ -8,33 +8,38 @@ def build_saga(saga_context):
     # Pasos de la saga a construir
     return SagaBuilder.create() \
         .action(
-            # Guardar 'purchase_id' devuelto por 'add_purchase' en 'saga_context'
             lambda: saga_context.update({
-                'purchase_id': add_purchase(
+                'id_purchase': add_purchase(
                     saga_context['product_id'],
-                    saga_context['address']
-                    )}),
-            # Usar 'purchase_id' para remover la compra
-            lambda: remove_purchase(saga_context['purchase_id'])
+                    saga_context['purchase_direction']
+                )
+            }),
+            lambda: remove_purchase(saga_context['id_purchase'])
         ) \
         .action(
             lambda: saga_context.update({
                 'payment_id': add_payment(
                     saga_context['product_id'],
-                    saga_context['pay_method']
-                    )}),
+                    saga_context['payment_method']
+                )
+            }),
             lambda: remove_payment(saga_context['payment_id'])
         ) \
         .action(
             lambda: saga_context.update({
                 'stock_id': update_stock(
                     saga_context['product_id'],
-                    saga_context['ammount'], saga_context['in_out'])}),
+                    saga_context['ammount'],
+                    'in'
+                )
+            }),
             lambda: remove_stock(saga_context['product_id'])
         ) \
-        .action(lambda: success()) \
+        .action(
+            lambda: success(),
+            lambda: None  # No hay acción de compensación para el éxito
+        ) \
         .build()
-
 
 def execute_saga(saga):
     # Ejecutar la Saga
@@ -50,7 +55,7 @@ def execute_saga(saga):
         }), 400
     # Caso de otra excepción
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": str(e)}), 500
     
 # Obtiene la respuesta (o excepción) al enviar una solicitud a una url (microservicio)
 def response_from_url(url, data):
