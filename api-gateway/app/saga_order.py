@@ -36,7 +36,7 @@ def add_payment(product_id,price, payment_method):
     
     add_payment_url = 'http://ms-payment:5004/payment/add'
     
-    response_from_url(add_payment_url, payment_data)
+    return response_from_url(add_payment_url, payment_data)
 
 def remove_payment(payment_id):
     # Recibir los datos de pago
