@@ -17,7 +17,7 @@ def get_catalogo():
 
     for product in product_list:
         product_key = f"product:{product['id']}"
-        Config.r.client.set(product_key, json.dumps(product), ex=3600)  
+        Config.r.set(product_key, json.dumps(product), ex=3600)  
 
 
     return jsonify({
