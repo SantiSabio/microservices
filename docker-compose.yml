@@ -45,6 +45,7 @@ services:
       - ./ms-catalog:/app
     depends_on:
       - mysql_db
+      - redis
     networks:
       - mynetwork
 
@@ -58,6 +59,7 @@ services:
       - ./ms-cart:/app
     depends_on:
       - mysql_db
+      - redis
     networks:
       - mynetwork
 
@@ -71,6 +73,7 @@ services:
       - ./ms-inventory:/app
     depends_on:
       - mysql_db
+      - redis
     networks:
       - mynetwork
 
@@ -84,6 +87,7 @@ services:
       - ./ms-payment:/app
     depends_on:
       - mysql_db
+      - redis
     networks:
       - mynetwork
 
