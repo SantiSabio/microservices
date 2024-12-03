@@ -6,3 +6,5 @@ SQLAlchemy==1.4.41
 mysql-connector-python==8.0.29
 Werkzeug==2.3.0 
 redis
+tenacity==8.0.1
+pybreaker==0.7.0

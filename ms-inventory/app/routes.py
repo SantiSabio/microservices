@@ -5,6 +5,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from app.config import Config
 import threading
+from tenacity import retry, stop_after_attempt, wait_fixed
+from pybreaker import CircuitBreaker, CircuitBreakerError
+
 
 inventory_bp = Blueprint('inventory', __name__)
 
@@ -13,9 +16,15 @@ engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+breaker = CircuitBreaker(fail_max=10, reset_timeout=10)
+
+
+
 lock= threading.Lock()
 
 @inventory_bp.route('/update', methods=['POST'])
+@breaker
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 def update_stock():
     data = request.json
     # Validar que los datos necesarios estén presentes
@@ -50,6 +59,16 @@ def update_stock():
                 session.commit()
 
         return jsonify({'message': 'Stock updated successfully'}), 200
+    
+    except CircuitBreakerError as e:
+        return jsonify({'error': 'Circuito Abierto'}), 500
     except SQLAlchemyError as e:
         session.rollback()  # Hacer rollback en caso de error
         return jsonify({'error': str(e)}), 500
+    
+
+
+
+
+  
+    
