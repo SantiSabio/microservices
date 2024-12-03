@@ -2,6 +2,8 @@ import unittest
 from app import create_app
 from app.config import Config
 import redis
+from unittest.mock import patch
+
 class TestInventoryRoutes(unittest.TestCase):
     def setUp(self):
         self.app = create_app()
@@ -21,23 +23,23 @@ class TestInventoryRoutes(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 200)
 
+    @patch('app.routes.redis_client.lock')
+    def test_update_stock_lock_in_use(self, mock_lock):
+        # Mock del comportamiento del lock
+        mock_lock_obj = mock_lock.return_value
+        mock_lock_obj.acquire.return_value = False  # Simula que el lock no se puede adquirir porque está en uso
 
-
-    def test_update_stock_lock_in_use(self):
         # Mock de los datos de entrada
         data = {
             'product_id': 1,
             'ammount': 10,
             'in_out': 'in'
         }
-        
-        # Adquirir el lock manualmente para simular que está en uso
-        lock = self.redis_client.lock('stock_lock', timeout=10)
-        lock.acquire(blocking=False)
-        
+
         response = self.client.post('/inventory/update', json=data)
         
         self.assertEqual(response.status_code, 409)
         self.assertEqual(response.json['error'], 'Recurso solicitado en uso')
-        
-        lock.release()
+
+if __name__ == '__main__':
+    unittest.main()
