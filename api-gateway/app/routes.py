@@ -5,8 +5,8 @@ api_gateway = Blueprint('api_gateway', __name__)
 
 CATALOG_SERVICE_URL = 'http://ms-catalog:5001/catalog'
 PURCHASE_SERVICE_URL = 'http://ms-purchase:5002/purchase'
+STOCK_SERVICE_URL = 'http://ms-inventory:5003/stock'
 PAYMENT_SERVICE_URL = 'http://ms-payment:5004/payment'
-STOCK_SERVICE_URL = 'http://ms-inventory:5004/stock'
 
 # Comenzar orden
 @api_gateway.route('/order', methods=['POST'])
