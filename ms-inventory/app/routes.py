@@ -62,9 +62,9 @@ def update_stock():
                         stock_item.stock_quantity += data['ammount']
                     else:
                         return jsonify({'error': 'Invalid in_out value'}), 400
-                    
-                    session.commit()
                     redis.set('estado', 'cerrado')
+                    session.commit()
+                    
                 return jsonify({'message': 'Stock updated successfully'}), 200
         else:
             return jsonify({'error': 'Recurso solicitado en uso'}), 409
@@ -74,7 +74,9 @@ def update_stock():
     except SQLAlchemyError as e:
         session.rollback()  # Hacer rollback en caso de error
         return jsonify({'error': str(e)}), 500
-
+    finally:
+        if lock.locked():
+            lock.release()
 
 
 
