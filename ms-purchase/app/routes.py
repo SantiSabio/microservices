@@ -1,6 +1,6 @@
 #ms-purchase/app/routes.py
 from datetime import datetime
-from flask import Blueprint, request,jsonify
+from flask import Blueprint, request, jsonify
 from app.models import db, Purchase
 from app import Config
 import json
@@ -9,23 +9,18 @@ from pybreaker import CircuitBreaker, CircuitBreakerError
 
 breaker = CircuitBreaker(fail_max=10, reset_timeout=10)
 
-
-
-#Definicion del Blueprint
+# Definicion del Blueprint
 purchase = Blueprint('purchase', __name__)
-
-
-
 
 # Ruta para manejar la creación de compras
 @purchase.route('/purchase/add', methods=['POST'])
-@breaker
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
+#@breaker
+#@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 def add_purchase():
     data = request.get_json()
 
     # Validar que los datos necesarios estén presentes
-    required_fields = ['product_id', 'purchase_date', 'purchase_direction']
+    required_fields = ['product_id', 'purchase_direction']
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing fields'}), 400
     
@@ -33,16 +28,15 @@ def add_purchase():
         # Crear una nueva compra
         new_purchase = Purchase(
             product_id=data['product_id'],
-            purchase_date=datetime.strptime(data['purchase_date'], '%Y-%m-%d'),
+            purchase_date=datetime.utcnow(),  # Fecha de compra automática
             purchase_direction=data['purchase_direction']
         )
 
         purchase_data = {
-                'id_purchase': new_purchase.id_purchase,
-                'product_id': new_purchase.product_id,
-                'purchase_date': new_purchase.purchase_date.strftime('%Y-%m-%d'),
-                'purchase_direction': new_purchase.purchase_direction
-            }
+            'id_purchase': new_purchase.id_purchase,
+            'product_id': new_purchase.product_id,
+            'purchase_direction': new_purchase.purchase_direction
+        }
         
         Config.r.set(f"purchase:{new_purchase.id_purchase}", json.dumps(purchase_data), ex=3600)
 
@@ -56,8 +50,8 @@ def add_purchase():
             'message': 'Purchase added successfully',
             'purchase_id': new_purchase.id_purchase}), 201
     
-    except CircuitBreakerError as e:
-        return jsonify({'error': 'Circuito Abierto'}), 500
+    #except CircuitBreakerError as e:
+    #    return jsonify({'error': 'Circuito Abierto'}), 500
     except Exception as e:
         db.session.rollback()  # Rollback en caso de error
         return jsonify({'error': str(e)}), 500

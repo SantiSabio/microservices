@@ -21,7 +21,9 @@ def create_order():
         'product_id': data['product_id'],
         'ammount': data['ammount'],
         'payment_method': data['payment_method'],
-        'purchase_direction': data['purchase_direction']
+        'purchase_direction': data['purchase_direction'],
+        'in_out': data['in_out'],
+        'price': data['price']
     }
     # Construir saga
     saga = build_saga(saga_context)

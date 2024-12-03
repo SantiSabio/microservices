@@ -2,11 +2,11 @@ from flask import jsonify
 from app.utils import response_from_url
 
 # Paso 1: Enviar los datos de compra a ms-purchase
-def add_purchase(product_id, address):
+def add_purchase(product_id, purchase_direction):
     # Recibir datos de compra en json, y colocarlos en el contexto
     purchase_data = {
         'product_id': product_id,
-        'address': address
+        'purchase_direction': purchase_direction
     }
     # Enviar al microservicio
     add_purchase_url = 'http://ms-purchase:5002/purchase/add'
@@ -26,11 +26,12 @@ def remove_purchase(purchase_id):
     return response_from_url(remove_purchase_url, purchase_data) # Será 200 o una excepción
 
 # Paso 2: Enviar los datos de pago a ms-payment
-def add_payment(product_id, payment_method):
+def add_payment(product_id,price, payment_method):
     # Recibir los datos de pago
     payment_data = {
         'product_id': product_id,
-        'pay_method': payment_method
+        'price': price,
+        'payment_method': payment_method
     }
     
     add_payment_url = 'http://ms-payment:5004/payment/add'
