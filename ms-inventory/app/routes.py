@@ -4,7 +4,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from app.config import Config
-from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import retry
+from tenacity.wait import wait_fixed
+from tenacity.stop import stop_after_attempt
 from pybreaker import CircuitBreaker, CircuitBreakerError
 
 redis_client = Config.r
