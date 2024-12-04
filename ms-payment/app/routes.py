@@ -1,9 +1,10 @@
-#ms-payment/app/routes.py
 from flask import Blueprint, request, jsonify
 from .models import db, Payment
 from app import Config
 import json
-from tenacity import retry, stop_after_attempt, wait_fixed
+from tenacity import retry
+from tenacity.wait import wait_fixed
+from tenacity.stop import stop_after_attempt
 from pybreaker import CircuitBreaker, CircuitBreakerError
 
 breaker = CircuitBreaker(fail_max=10, reset_timeout=10)

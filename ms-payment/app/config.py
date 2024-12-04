@@ -1,5 +1,4 @@
-import os
-import redis
+import os, redis
 
 class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', 'mysql+mysqlconnector://root:password@mysql_db:3306/catalogodb')
