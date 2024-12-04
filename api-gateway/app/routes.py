@@ -10,8 +10,8 @@ STOCK_SERVICE_URL = os.getenv('STOCK_SERVICE_URL')
 PAYMENT_SERVICE_URL = os.getenv('PAYMENT_SERVICE_URL')
 
 # Comenzar orden
-@api_gateway.route('/order', methods=['POST'])
-def create_order(data):
+@api_gateway.route('/order', methods=['POST','GET'])
+def create_order():
     # Obtener datos de la orden
     data = request.get_json()
     if not data:
@@ -20,9 +20,11 @@ def create_order(data):
     # Crear el contexto de la saga
     saga_context = {
         'product_id': data['product_id'],
-        'ammount': data['ammount'],
-        'pay_method': data['pay_method'],
-        'address': data['address']
+        'amount': data['amount'],
+        'payment_method': data['payment_method'],
+        'purchase_direction': data['purchase_direction'],
+        'in_out': data['in_out'],
+        'price': data['price']
     }
     # Construir saga
     saga = build_saga(saga_context)
@@ -30,16 +32,3 @@ def create_order(data):
 
     return order_result
     
-# Consultar catálogo
-# @app.route('/catalog', methods=['GET'])
-# El usuario busca por 'product_id' y obtiene los atributos del producto
-# def search_product(id):
-# get_product_url = CATALOG_SERVICE_URL
-
-    # try:
-    #     response = requests.post(get_product_url, json=product)
-    #     response.raise_for_status()
-    # except requests.exceptions.RequestException as e:
-    #     return jsonify({'error': str(e)}), 500
-    
-    # return jsonify(response.json()), response.status_code

@@ -8,6 +8,4 @@ class Stock(db.Model):
     
     id_stock = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, nullable=False)
-    #fecha_transaccion = db.Column(db.DateTime, default=datetime.utcnow)
-    stock_quantity = db.Column(db.Float, nullable=False)
-    #entrada_salida = db.Column(db.Integer, nullable=False)  # 1: entrada, 2: salida
+    amount = db.Column(db.Float, nullable=False)
