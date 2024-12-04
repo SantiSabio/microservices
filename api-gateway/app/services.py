@@ -20,7 +20,6 @@ def build_saga(saga_context):
             lambda: saga_context.update({
                 'payment_id': add_payment(
                     saga_context['product_id'],
-                    saga_context['price'],
                     saga_context['payment_method']
                 )
             }),
@@ -31,7 +30,7 @@ def build_saga(saga_context):
                 'stock_id': update_stock(
                     saga_context['product_id'],
                     saga_context['ammount'],
-                    'out'
+                    'in'
                 )
             }),
             lambda: remove_stock(saga_context['product_id'])
