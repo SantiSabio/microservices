@@ -14,6 +14,8 @@ purchase = Blueprint('purchase', __name__)
 
 # Ruta para manejar la creación de compras
 @purchase.route('/purchase/add', methods=['POST'])
+#@breaker
+#@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 def add_purchase():
     data = request.get_json()
 
@@ -38,40 +40,53 @@ def add_purchase():
         
         Config.r.set(f"purchase:{new_purchase.id_purchase}", json.dumps(purchase_data), ex=3600)
 
+
+
         # Agregar la nueva compra a la base de datos
         db.session.add(new_purchase)
         db.session.commit()
 
-        return jsonify({'id_purchase': new_purchase.id_purchase}), 201
+        return jsonify({
+            'message': 'Purchase added successfully',
+            'purchase_id': new_purchase.id_purchase}), 201
     
+    #except CircuitBreakerError as e:
+    #    return jsonify({'error': 'Circuito Abierto'}), 500
     except Exception as e:
         db.session.rollback()  # Rollback en caso de error
         return jsonify({'error': str(e)}), 500
 
+
+
+
+
 @purchase.route('/purchase/remove', methods=['POST'])
 @breaker
-#@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
-# Ruta para manejar la eliminacion de una compra
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
+#Ruta para manejar la eliminacion de una compra
 def remove_purchase():
     data = request.get_json()
 
-    if not 'id_purchase' in data:
-        return jsonify({'error': 'Missing fields'}), 400
+    if not 'purchase_id' in data:
+        return jsonify({'error': 'Missing fields'}, 400)
     
     try:
         # Buscar la compra
-        purchase = Purchase.query.get(data['id_purchase'])
+        purchase = Purchase.query.get(data['purchase_id'])
         
         if not purchase:
             return jsonify({'error': 'Purchase not found'}), 404
         
-        # Eliminar la compra encontrada
+        # Eliminar el pago encontrado
         db.session.delete(purchase)
         db.session.commit()
-        return jsonify({'message': 'Purchase removed successfully'}), 200
+        return jsonify({'message': 'Purchase removed succesfully'}), 200
     
+
     except CircuitBreakerError as e:
         return jsonify({'error': 'Circuito Abierto'}), 500
     except Exception as e:
         db.session.rollback()  # Hacer rollback en caso de error
         return jsonify({'error': str(e)}), 500
+
+        
