@@ -1,9 +1,7 @@
-# ms-purchase/tests/test_purchase.py
 import unittest
-from datetime import datetime
 from app import create_app, db
 from app.models import Purchase
-from unittest.mock import MagicMock
+
 
 class PurchaseTestCase(unittest.TestCase):
     def setUp(self):
@@ -64,6 +62,7 @@ class PurchaseTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('error', response_data)
         self.assertEqual(response_data['error'], 'Missing fields')
+
 
 if __name__ == '__main__':
     unittest.main()

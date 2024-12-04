@@ -1,4 +1,3 @@
-#ms-purcgase/app/models.py
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
