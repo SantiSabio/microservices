@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-
   traefik:
     image: traefik:v2.5
     command:
@@ -66,9 +65,8 @@ services:
       - mynetwork
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ms-catalog.rule=Host(`ms-catalog.localhost`)"
-      - "traefik.http.services.ms-catalog.loadbalancer.server.port=5002"
-
+      - "traefik.http.routers.ms-purchase.rule=Host(`ms-purchase.localhost`)"
+      - "traefik.http.services.ms-purchase.loadbalancer.server.port=5002"
 
   ms-catalog:
     build: ./ms-catalog
