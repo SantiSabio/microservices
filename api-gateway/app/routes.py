@@ -1,12 +1,13 @@
+import os
 from flask import Blueprint, jsonify, request
 from app.services import build_saga, execute_saga
 
 api_gateway = Blueprint('api_gateway', __name__)
 
-CATALOG_SERVICE_URL = 'http://ms-catalog:5001/catalog'
-PURCHASE_SERVICE_URL = 'http://ms-purchase:5002/purchase'
-STOCK_SERVICE_URL = 'http://ms-inventory:5003/stock'
-PAYMENT_SERVICE_URL = 'http://ms-payment:5004/payment'
+CATALOG_SERVICE_URL = os.getenv('CATALOG_SERVICE_URL')
+PURCHASE_SERVICE_URL = os.getenv('PURCHASE_SERVICE_URL')
+STOCK_SERVICE_URL = os.getenv('STOCK_SERVICE_URL')
+PAYMENT_SERVICE_URL = os.getenv('PAYMENT_SERVICE_URL')
 
 # Comenzar orden
 @api_gateway.route('/order', methods=['POST'])
