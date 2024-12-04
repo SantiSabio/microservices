@@ -10,7 +10,7 @@ from tenacity.stop import stop_after_attempt
 from pybreaker import CircuitBreaker, CircuitBreakerError
 
 redis_client = Config.r
-redis_client.set('estado', 'cerrado')
+
 
 inventory_bp = Blueprint('inventory', __name__)
 
@@ -23,7 +23,7 @@ breaker = CircuitBreaker(fail_max=10, reset_timeout=10)
 
 @inventory_bp.route('/update', methods=['POST'])
 @breaker
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
+#@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 def update_stock():
     data = request.json
     
@@ -69,5 +69,7 @@ def update_stock():
         session.rollback()  # Hacer rollback en caso de error
         return jsonify({'error': str(e)}), 500
     finally:
+        redis_client.set('estado', 'cerrado')
+
         if lock.locked():
             lock.release()

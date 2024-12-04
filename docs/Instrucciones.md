@@ -77,7 +77,7 @@ Al ejecutar en el terminal usando el product_id y la cantidad a comprar (out) y 
 
 ```powershell
 for ($i=1; $i -le 10; $i++) {
-    Invoke-RestMethod -Uri http://localhost:5003/inventory/update -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"product_id": 1, "ammount": 9, "in_out": "out"}'
+    Invoke-RestMethod -Uri http://localhost:5003/inventory/update -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"product_id": 1, "amount": 9, "in_out": "out"}'
     }
 ```
 

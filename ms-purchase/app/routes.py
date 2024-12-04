@@ -50,8 +50,8 @@ def add_purchase():
             'message': 'Purchase added successfully',
             'id_purchase': new_purchase.id_purchase}), 201
     
-    #except CircuitBreakerError as e:
-    #    return jsonify({'error': 'Circuito Abierto'}), 500
+    except CircuitBreakerError as e:
+        return jsonify({'error': 'Circuito Abierto'}), 500
     except Exception as e:
         db.session.rollback()  # Rollback en caso de error
         return jsonify({'error': str(e)}), 500
