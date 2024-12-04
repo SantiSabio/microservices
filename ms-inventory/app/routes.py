@@ -1,16 +1,15 @@
 from flask import Blueprint, request, jsonify
+from tenacity import retry
+from tenacity.wait import wait_fixed
+from tenacity.stop import stop_after_attempt
 from app.models import Stock
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from app.config import Config
-from tenacity import retry
-from tenacity.wait import wait_fixed
-from tenacity.stop import stop_after_attempt
 from pybreaker import CircuitBreaker, CircuitBreakerError
 
 redis_client = Config.r
-
 
 inventory_bp = Blueprint('inventory', __name__)
 
@@ -23,12 +22,11 @@ breaker = CircuitBreaker(fail_max=10, reset_timeout=10)
 
 @inventory_bp.route('/update', methods=['POST'])
 @breaker
-#@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 def update_stock():
     data = request.json
-    
-    required_fields = ['product_id', 'amount', 'in_out']
 
+    required_fields = ['product_id', 'amount', 'in_out']
     missing_fields = [field for field in required_fields if field not in data]
     present_fields = {field: data[field] for field in required_fields if field in data}
 
@@ -44,10 +42,10 @@ def update_stock():
                 with session.begin():
                     redis_client.set('estado', 'abierto')
                     stock_item = session.query(Stock).with_for_update().filter_by(product_id=data['product_id']).first()
-                    
+
                     if not stock_item:
                         return jsonify({'error': 'Stock not found'}), 404
-                    
+
                     if data['in_out'] == 'out':
                         if stock_item.amount < data['amount']:
                             return jsonify({'error': 'Insufficient stock'}), 400
@@ -58,11 +56,11 @@ def update_stock():
                         return jsonify({'error': 'Invalid in_out value'}), 400
                     redis_client.set('estado', 'cerrado')
                     session.commit()
-                    
+
                 return jsonify({'message': 'Stock updated successfully'}), 200
         else:
             return jsonify({'error': 'Recurso solicitado en uso'}), 409
-        
+
     except CircuitBreakerError:
         return jsonify({'error': 'Circuito Abierto'}), 500
     except SQLAlchemyError as e:
