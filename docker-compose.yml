@@ -51,6 +51,25 @@ services:
     networks:
       - mynetwork
 
+  ms-purchase:
+    build: ./ms-purchase
+    ports:
+      - "5002:5002"
+    env_file:
+      - .env
+    volumes:
+      - ./ms-purchase:/app
+    depends_on:
+      - mysql_db
+      - redis
+    networks:
+      - mynetwork
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ms-catalog.rule=Host(`ms-catalog.localhost`)"
+      - "traefik.http.services.ms-catalog.loadbalancer.server.port=5002"
+
+
   ms-catalog:
     build: ./ms-catalog
     ports:
