@@ -17,10 +17,10 @@ def build_saga(saga_context):
         .action(
             lambda: saga_context.update(add_payment(
                 saga_context['product_id'],
-                saga_context['price'],
-                saga_context['payment_method'],
                 saga_context['amount'],
-                saga_context.get('id_purchase')
+                saga_context['price'],
+                saga_context.get('id_purchase'),
+                saga_context['payment_method']
             )),
             lambda: remove_payment(saga_context.get('payment_id'))
         ) \

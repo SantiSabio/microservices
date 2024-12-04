@@ -14,8 +14,8 @@ purchase = Blueprint('purchase', __name__)
 
 # Ruta para manejar la creación de compras
 @purchase.route('/purchase/add', methods=['POST'])
-#@breaker
-#@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
+@breaker
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 def add_purchase():
     data = request.get_json()
 

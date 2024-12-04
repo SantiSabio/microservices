@@ -30,13 +30,15 @@ def remove_purchase(id_purchase):
         raise Exception(f"Error al remover la compra: {response.status_code}, {response.json()}")
 
 # Paso 2: Enviar los datos de pago a ms-payment
-def add_payment(product_id, price, payment_method, id_purchase,amount):
+def add_payment(product_id, amount,price,id_purchase,payment_method):
     payment_data = {
         'product_id': product_id,
+        'amount': amount,
         'price': price,
-        'payment_method': payment_method,
         'id_purchase': id_purchase,
-        'amount': amount
+        'payment_method': payment_method
+        
+       
     }
     add_payment_url = 'http://ms-payment:5004/payment/add'
     response = response_from_url(add_payment_url, payment_data)
