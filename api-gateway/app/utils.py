@@ -1,4 +1,3 @@
-# app/utils.py
 import requests
 
 class MockResponse:

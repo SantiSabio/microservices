@@ -1,4 +1,4 @@
-import os,redis
+import os, redis
 
 class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv(

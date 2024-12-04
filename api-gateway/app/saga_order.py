@@ -36,9 +36,7 @@ def add_payment(product_id, amount,price,id_purchase,payment_method):
         'amount': amount,
         'price': price,
         'id_purchase': id_purchase,
-        'payment_method': payment_method
-        
-       
+        'payment_method': payment_method      
     }
     add_payment_url = 'http://ms-payment:5004/payment/add'
     response = response_from_url(add_payment_url, payment_data)

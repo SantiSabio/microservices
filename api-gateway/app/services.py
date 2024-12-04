@@ -1,4 +1,3 @@
-import requests
 from saga import SagaBuilder, SagaError
 from app.saga_order import add_purchase, remove_purchase, add_payment, remove_payment, update_stock, remove_stock, success
 from flask import jsonify
