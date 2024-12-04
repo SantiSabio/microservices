@@ -8,32 +8,29 @@ def build_saga(saga_context):
     # Pasos de la saga a construir
     return SagaBuilder.create() \
         .action(
-            lambda: saga_context.update({
-                'id_purchase': add_purchase(
-                    saga_context['product_id'],
-                    saga_context['purchase_direction']
-                )
-            }),
-            lambda: remove_purchase(saga_context['id_purchase'])
+            lambda: saga_context.update(add_purchase(
+                saga_context['product_id'],
+                saga_context['purchase_direction']
+            )),
+            lambda: remove_purchase(saga_context.get('id_purchase'))
         ) \
         .action(
-            lambda: saga_context.update({
-                'payment_id': add_payment(
-                    saga_context['product_id'],
-                    saga_context['payment_method']
-                )
-            }),
-            lambda: remove_payment(saga_context['payment_id'])
+            lambda: saga_context.update(add_payment(
+                saga_context['product_id'],
+                saga_context['price'],
+                saga_context['payment_method'],
+                saga_context['amount'],
+                saga_context.get('id_purchase')
+            )),
+            lambda: remove_payment(saga_context.get('payment_id'))
         ) \
         .action(
-            lambda: saga_context.update({
-                'stock_id': update_stock(
-                    saga_context['product_id'],
-                    saga_context['ammount'],
-                    'in'
-                )
-            }),
-            lambda: remove_stock(saga_context['product_id'])
+            lambda: saga_context.update(update_stock(
+                saga_context['product_id'],
+                saga_context['amount'],
+                'out'
+            )),
+            lambda: remove_stock(saga_context.get('stock_id'))
         ) \
         .action(
             lambda: success(),
@@ -56,17 +53,3 @@ def execute_saga(saga):
     # Caso de otra excepción
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-# Obtiene la respuesta (o excepción) al enviar una solicitud a una url (microservicio)
-def response_from_url(url, data):
-
-    if not data:
-        return jsonify({'error': 'Datos inválidos'}), 400
-    
-    try:
-        response = requests.post(url, json=data)
-        response.raise_for_status()  # Lanza una excepción si el código de estado es 4xx o 5xx
-        return response
-    except requests.exceptions.RequestException as e:
-        # Lanza una excepción para que saga-py inicie la compensación
-        raise Exception(f"Error al realizar la compra: {str(e)}")

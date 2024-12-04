@@ -9,7 +9,7 @@ STOCK_SERVICE_URL = 'http://ms-inventory:5003/stock'
 PAYMENT_SERVICE_URL = 'http://ms-payment:5004/payment'
 
 # Comenzar orden
-@api_gateway.route('/order', methods=['POST'])
+@api_gateway.route('/order', methods=['POST','GET'])
 def create_order():
     # Obtener datos de la orden
     data = request.get_json()
@@ -19,7 +19,7 @@ def create_order():
     # Crear el contexto de la saga
     saga_context = {
         'product_id': data['product_id'],
-        'ammount': data['ammount'],
+        'amount': data['amount'],
         'payment_method': data['payment_method'],
         'purchase_direction': data['purchase_direction'],
         'in_out': data['in_out'],

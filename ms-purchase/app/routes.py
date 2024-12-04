@@ -48,7 +48,7 @@ def add_purchase():
 
         return jsonify({
             'message': 'Purchase added successfully',
-            'purchase_id': new_purchase.id_purchase}), 201
+            'id_purchase': new_purchase.id_purchase}), 201
     
     #except CircuitBreakerError as e:
     #    return jsonify({'error': 'Circuito Abierto'}), 500
@@ -67,12 +67,12 @@ def add_purchase():
 def remove_purchase():
     data = request.get_json()
 
-    if not 'purchase_id' in data:
+    if not 'id_purchase' in data:
         return jsonify({'error': 'Missing fields'}, 400)
     
     try:
         # Buscar la compra
-        purchase = Purchase.query.get(data['purchase_id'])
+        purchase = Purchase.query.get(data['id_purchase'])
         
         if not purchase:
             return jsonify({'error': 'Purchase not found'}), 404

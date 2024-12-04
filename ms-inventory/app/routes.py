@@ -10,6 +10,7 @@ from tenacity.stop import stop_after_attempt
 from pybreaker import CircuitBreaker, CircuitBreakerError
 
 redis_client = Config.r
+redis_client.set('estado', 'cerrado')
 
 inventory_bp = Blueprint('inventory', __name__)
 
@@ -25,11 +26,15 @@ breaker = CircuitBreaker(fail_max=10, reset_timeout=10)
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 def update_stock():
     data = request.json
-    required_fields = ['product_id', 'ammount', 'in_out']
     
-    if not all(field in data for field in required_fields):
-        return jsonify({'error': 'Missing fields'}), 400
-    
+    required_fields = ['product_id', 'amount', 'in_out']
+
+    missing_fields = [field for field in required_fields if field not in data]
+    present_fields = {field: data[field] for field in required_fields if field in data}
+
+    if missing_fields:
+        return jsonify({'error': 'Missing fields', 'present_fields': present_fields}), 400
+
     lock = redis_client.lock('stock_lock', timeout=10)
     try:
         if lock.acquire(blocking=False):
@@ -44,11 +49,11 @@ def update_stock():
                         return jsonify({'error': 'Stock not found'}), 404
                     
                     if data['in_out'] == 'out':
-                        if stock_item.stock_quantity < data['ammount']:
+                        if stock_item.amount < data['amount']:
                             return jsonify({'error': 'Insufficient stock'}), 400
-                        stock_item.stock_quantity -= data['ammount']
+                        stock_item.amount -= data['amount']
                     elif data['in_out'] == 'in':
-                        stock_item.stock_quantity += data['ammount']
+                        stock_item.amount += data['amount']
                     else:
                         return jsonify({'error': 'Invalid in_out value'}), 400
                     redis_client.set('estado', 'cerrado')

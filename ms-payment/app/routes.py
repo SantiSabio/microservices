@@ -16,30 +16,33 @@ payment = Blueprint('payment', __name__)
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 def add_payment():
     data = request.get_json()
-    required_fields = ['product_id', 'price', 'payment_method']
+    required_fields = ['product_id', 'price', 'payment_method','amount','id_purchase']
 
-    if not all(field in data for field in required_fields):
-        return jsonify({'error': 'Missing fields'}), 400
+    missing_fields = [field for field in required_fields if field not in data]
+    present_fields = {field: data[field] for field in required_fields if field in data}
+
+    if missing_fields:
+        return jsonify({'error': 'Missing fields', 'present_fields': present_fields}), 400
 
     try:
         new_payment = Payment(
             product_id=data['product_id'],
-            quantity=data['quantity'],
+            amount=data['amount'],
             price=data['price'],
-            purchase_id=data['purchase_id'],
+            id_purchase=data['id_purchase'],
             payment_method=data['payment_method']
         )
 
         payment_data = {
             'payment_id': new_payment.payment_id,
             'product_id': new_payment.product_id,
-            'quantity': new_payment.quantity,
+            'amount': new_payment.amount,
             'price': new_payment.price,
-            'purchase_id': new_payment.purchase_id,
+            'id_purchase': new_payment.id_purchase,
             'payment_method': new_payment.payment_method
         }
 
-        Config.r.set(f"purchase:{payment_data['purchase_id']}", json.dumps(payment_data), ex=3600)
+        Config.r.set(f"payment:{payment_data['payment_id']}", json.dumps(payment_data), ex=3600)
 
         db.session.add(new_payment)
         db.session.commit()
