@@ -1,6 +1,7 @@
 import os
 from flask import Blueprint, jsonify, request
 from app.services import build_saga, execute_saga
+import requests
 
 api_gateway = Blueprint('api_gateway', __name__)
 
@@ -32,3 +33,14 @@ def create_order():
 
     return order_result
     
+# Consultar catálogo
+@api_gateway.route('/catalog/<int:id>', methods=['GET'])
+def search_product(id):
+    get_product_url = f"{CATALOG_SERVICE_URL}/catalog/{id}"
+    try:
+        response = requests.get(get_product_url)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': str(e)}), 500
+    
+    return jsonify(response.json()), response.status_code
