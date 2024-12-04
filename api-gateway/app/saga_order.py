@@ -1,82 +1,68 @@
 from flask import jsonify
+import request
 from app.utils import response_from_url
 
-# Paso 1: Enviar los datos de compra a ms-purchase
-def add_purchase(product_id, purchase_direction):
-    # Recibir datos de compra en json, y colocarlos en el contexto
-    purchase_data = {
-        'product_id': product_id,
-        'purchase_direction': purchase_direction
-    }
-    # Enviar al microservicio
-    add_purchase_url = 'http://ms-purchase:5002/purchase/add'
-
-    return response_from_url(add_purchase_url, purchase_data) # Será 'purchase_id' o una excepción
-
-# Compensación
-def remove_purchase(purchase_id):
+def create_order():
+    data = request.get_json()
     
-    purchase_data = {
-        'purchase_id': purchase_id
-    }
+    # Paso 1: Crear compra
+    purchase_response, status_code = create_purchase(data)
+    if status_code != 201:
+        return jsonify({'error': 'Error al crear la compra'}), status_code
     
-    # Enviar 'data' al microservicio 'ms-purchase' (solicitud POST)
-    remove_purchase_url = 'http://ms-purchase:5002/purchase/remove'
+    purchase_id = purchase_response['id_purchase']
+    
+    # Paso 2: Agregar pago
+    payment_response, status_code = add_payment(purchase_id, data)
+    if status_code != 201:
+        # Compensar la compra
+        remove_purchase(purchase_id)
+        return jsonify({'error': 'Error al agregar el pago'}), status_code
+    
+    # Paso 3: Actualizar inventario
+    stock_response, status_code = update_stock(data)
+    if status_code != 200:
+        # Compensar el pago y la compra
+        remove_payment(payment_response['payment_id'])
+        remove_purchase(purchase_id)
+        return jsonify({'error': 'Error al actualizar el inventario'}), status_code
+    
+    # Paso 4: Saga completada
+    return success()
 
-    return response_from_url(remove_purchase_url, purchase_data) # Será 200 o una excepción
+def create_purchase(data):
+    purchase_url = 'http://ms-purchase:5002/purchase/add'
+    return response_from_url(purchase_url, data)
 
-# Paso 2: Enviar los datos de pago a ms-payment
-def add_payment(product_id,price, payment_method):
-    # Recibir los datos de pago
+def add_payment(purchase_id, data):
     payment_data = {
-        'product_id': product_id,
-        'price': price,
-        'payment_method': payment_method
+        'purchase_id': purchase_id,
+        'product_id': data['product_id'],
+        'quantity': data['quantity'],
+        'price': data['price'],
+        'payment_method': data['payment_method']
     }
-    
-    add_payment_url = 'http://ms-payment:5004/payment/add'
-    
-    return response_from_url(add_payment_url, payment_data)
+    payment_url = 'http://ms-payment:5004/payment/add'
+    return response_from_url(payment_url, payment_data)
 
-def remove_payment(payment_id):
-    # Recibir los datos de pago
-    payment_data = {
-        'payment_id': payment_id
-    }
-    
-    # Enviar al microservicio
-    remove_payment_url = 'http://ms-payment:5004/payment/remove'
-
-    return response_from_url(remove_payment_url, payment_data)
-
-# Paso 3: Registrar strock
-def update_stock(product_id, ammount, in_out):
-    # Recibir los datos de actualización de stock
+def update_stock(data):
     stock_data = {
-        'product_id': product_id,
-        'ammount': ammount,
-        'in_out' : in_out
+        'product_id': data['product_id'],
+        'quantity': data['quantity']
     }
-    
-    # Enviar al microservicio
     add_stock_url = 'http://ms-inventory:5003/inventory/update'
-
     return response_from_url(add_stock_url, stock_data)
 
-def remove_stock(stock_id):
-    
-    stock_data = {
-        'stock_id': stock_id
-    }
-    
-    # Enviar al microservicio
-    remove_stock_url = 'http://ms-inventory:5003/inventory/remove'
+def remove_purchase(purchase_id):
+    purchase_data = {'id_purchase': purchase_id}
+    remove_purchase_url = 'http://ms-purchase:5002/purchase/remove'
+    return response_from_url(remove_purchase_url, purchase_data)
 
-    return response_from_url(remove_stock_url, stock_data)
+def remove_payment(payment_id):
+    payment_data = {'payment_id': payment_id}
+    remove_payment_url = 'http://ms-payment:5004/payment/remove'
+    return response_from_url(remove_payment_url, payment_data)
 
-# Paso 4: Saga completada
 def success():
     return jsonify({'message': "Compra realizada con éxito."}), 201
-
-
 

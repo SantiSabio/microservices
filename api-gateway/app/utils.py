@@ -11,7 +11,7 @@ def response_from_url(url, data):
     try:
         response = requests.post(url, json=data)
         response.raise_for_status()  # Lanza una excepción si el código de estado es 4xx o 5xx
-        return response.json()
+        return response
     except requests.exceptions.RequestException as e:
         # Lanza una excepción para que saga-py inicie la compensación
         raise Exception(f"Error al realizar la compra: {str(e)}")

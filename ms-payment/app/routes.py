@@ -19,7 +19,7 @@ def add_payment():
     # Se reciben los datos de pago
     data = request.get_json()
     # Validar que los datos necesarios estén presentes
-    required_fields = ['product_id', 'price', 'payment_method']
+    required_fields = ['product_id', 'price', 'payment_method','ammount']
 
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing fields'}), 400
@@ -28,14 +28,14 @@ def add_payment():
         # Crea un nuevo pago
         new_payment = Payment(
             product_id=data['product_id'],
-            quantity=data['quantity'],
+            quantity=data['ammount'],
             price=data['price'],
             purchase_id=data['purchase_id'],
             payment_method=data['payment_method']
         )
 
         payment_data = {
-        'payment_id': new_payment.id_payment,
+        'payment_id': new_payment.payment_id,
         'product_id': new_payment.product_id,
         'quantity': new_payment.quantity,
         'price': new_payment.price,
@@ -50,7 +50,7 @@ def add_payment():
         db.session.add(new_payment)
         db.session.commit()
 
-        return jsonify({'message': 'Payment added successfully'}), 201
+        return jsonify({'id_purchase': new_payment.payment_id}), 201
     except CircuitBreakerError as e:
         return jsonify({'error': 'Circuito Abierto'}), 500
     except Exception as e:
