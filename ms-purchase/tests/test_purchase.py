@@ -19,28 +19,41 @@ class PurchaseTestCase(unittest.TestCase):
             db.drop_all()
 
     def test_purchase_success(self):
-        # Simula la verificación de la existencia del producto
-        def mock_get_product_by_id(product_id):
-            if product_id == 1:
-                return {'id_producto': 1, 'name': 'Producto de prueba', 'description': 'Descripción de prueba'}
-            return None
-
-        # Mockear manualmente la función dentro del test
-        self.app.config['get_product_by_id'] = mock_get_product_by_id
+        # Datos de prueba
+        product_id = 1
+        purchase_direction = '123 Calle Falsa'
 
         purchase_data = {
-            'product_id': 1,
-            'purchase_date': '2024-10-06',  # Asegúrate de que este formato sea aceptado por tu aplicación
-            'purchase_direction': '123 Calle Falsa'
+            'product_id': product_id,
+            'purchase_direction': purchase_direction
         }
+        # Se realiza la solicitud
         response = self.client.post('/purchase/add', json=purchase_data)
-        print(response.data)  # Imprime el contenido de la respuesta
+        print(response.data)
         self.assertEqual(response.status_code, 201)
 
-        with self.app.app_context():
-            purchase = Purchase.query.filter_by(product_id=1).first()
-            self.assertIsNotNone(purchase)
-            self.assertEqual(purchase.purchase_direction, '123 Calle Falsa')
+        # Se imprime la respuesta
+        response_json = response.get_json()
+        print(response_json)
+
+        # Se obtiene el ID de la compra
+        purchase_id = response_json.get('purchase_id')
+
+        # Se verifica que se haya creado correctamente
+        try:
+            with self.app.app_context():
+                purchase = Purchase.query.filter_by(id_purchase=purchase_id).first()
+                self.assertIsNotNone(purchase)
+                self.assertEqual(purchase.purchase_direction, purchase_data["purchase_direction"])
+        
+        # Se elimina la compra
+        finally:
+            with self.app.app_context():
+                if purchase_id:
+                    purchase = Purchase.query.filter_by(id_purchase=purchase_id).first()  # Use the correct primary key attribute
+                    if purchase:
+                        db.session.delete(purchase)
+                        db.session.commit()
 
     def test_missing_fields(self):
         purchase_data = {
