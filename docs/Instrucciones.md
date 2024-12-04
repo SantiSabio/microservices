@@ -90,3 +90,13 @@ for i in {1..10}; do
     -d '{"product_id": 1, "ammount": 9, "in_out": "out"}'
 done
 ```
+
+docker exec -it microservices-ms-purchase-1 python -m unittest discover -s tests
+
+docker exec -it microservices-ms-inventory-1 python -m unittest discover -s tests
+
+docker exec -it microservices-ms-payment-1 python -m unittest discover -s tests  
+
+docker exec -it microservices-ms-catalog-1 python -m unittest discover -s tests  
+
+docker exec -it microservices-api-gateway-1 python -m unittest discover -s tests 
