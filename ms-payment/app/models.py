@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class Payment(db.Model):
-    __tablename__ = 'payments'
+    __tablename__ = 'payment'
 
     payment_id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, nullable=False)
