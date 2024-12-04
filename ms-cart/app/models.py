@@ -1,6 +1,6 @@
-#ms-cart/app/models.py
 from flask_sqlalchemy import SQLAlchemy
-
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String, DateTime
 db = SQLAlchemy()
 
 class Purchase(db.Model):
