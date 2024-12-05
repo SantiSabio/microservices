@@ -1,14 +1,9 @@
 import os
-from flask import Blueprint, jsonify, request
-from app.services import build_saga, execute_saga
 import requests
+from flask import Blueprint, jsonify, request
+from .services import build_saga, execute_saga
 
 api_gateway = Blueprint('api_gateway', __name__)
-
-CATALOG_SERVICE_URL = os.getenv('CATALOG_SERVICE_URL')
-PURCHASE_SERVICE_URL = os.getenv('PURCHASE_SERVICE_URL')
-STOCK_SERVICE_URL = os.getenv('STOCK_SERVICE_URL')
-PAYMENT_SERVICE_URL = os.getenv('PAYMENT_SERVICE_URL')
 
 # Comenzar orden
 @api_gateway.route('/order', methods=['POST','GET'])
@@ -29,14 +24,12 @@ def create_order():
     }
     # Construir saga
     saga = build_saga(saga_context)
-    order_result = execute_saga(saga)
-
-    return order_result
+    return execute_saga(saga)
     
 # Consultar catálogo
 @api_gateway.route('/catalog/<int:id>', methods=['GET'])
 def search_product(id):
-    get_product_url = f"{CATALOG_SERVICE_URL}/catalog/{id}"
+    get_product_url = f"{os.getenv("CATALOG_SERVICE_URL")}/{id}"
     try:
         response = requests.get(get_product_url)
         response.raise_for_status()
