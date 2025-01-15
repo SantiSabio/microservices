@@ -4,13 +4,12 @@ services:
 
   traefik:
     image: traefik:v2.5
-    command:
+    command:command:
       - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
+      - "--providers.docker"
     ports:
-      - "80:80"
-      - "8081:8080"  # Cambiar el puerto del dashboard de Traefik
+      - "81:80" # Puerto
+      - "8081:8080" # Web UI
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
