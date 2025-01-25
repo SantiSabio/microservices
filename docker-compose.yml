@@ -4,7 +4,7 @@ services:
 
   traefik:
     image: traefik:v2.5
-    command:command:
+    command:
       - "--api.insecure=true"
       - "--providers.docker"
     ports:
