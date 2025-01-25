@@ -1,20 +1,22 @@
+version: '3.8'
+
 services:
   traefik:
-    image: traefik:3.3.2
+    image: traefik:v2.5
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--entrypoints.web.address=:80"
     ports:
-      - "81:80" # Port
-      - "8081:8080" # Web UI
+      - "80:80"
+      - "8081:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       - mynetwork
 
   mysql_db:
-    image: mysql:9.2.0
+    image: mysql
     ports:
       - "3307:3306"
     environment:
@@ -27,24 +29,24 @@ services:
       - mynetwork
 
   phpmyadmin:
-    image: phpmyadmin:5.2.2
+    image: phpmyadmin/phpmyadmin
+    restart: always
     ports:
       - "8080:80"
     environment:
       PMA_HOST: mysql_db
       MYSQL_ROOT_PASSWORD: password
-    depends_on:
-      - mysql_db
     networks:
       - mynetwork
 
   redis:
-    image: redis:7.4.2
+    image: redis
     container_name: redis_cache
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    restart: always
     networks:
       - mynetwork
 
@@ -70,6 +72,8 @@ services:
     build: ./ms-catalog
     ports:
       - "5001:5001"
+    env_file:
+      - .env
     volumes:
       - ./ms-catalog:/app
     depends_on:
@@ -81,37 +85,13 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.ms-catalog.rule=Host(`ms-catalog.localhost`)"
       - "traefik.http.services.ms-catalog.loadbalancer.server.port=5001"
-      # Circuit Breaker
-      - "traefik.http.middlewares.circuitbreaker.retry.attempts=3"
-      - "traefik.http.middlewares.circuitbreaker.retry.initialinterval=500ms"
-      # Enlace del middleware al router
-      - "traefik.http.routers.ms-catalog.middlewares=circuitbreaker"
-
-  ms-cart:
-    build: ./ms-cart
-    ports:
-      - "5002:5002"
-    volumes:
-      - ./ms-cart:/app
-    depends_on:
-      - mysql_db
-      - redis
-    networks:
-      - mynetwork
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ms-cart.rule=PathPrefix(`/ms-cart`)"
-      - "traefik.http.services.ms-cart.loadbalancer.server.port=5002"
-      # Circuit Breaker
-      - "traefik.http.middlewares.circuitbreaker.retry.attempts=3"
-      - "traefik.http.middlewares.circuitbreaker.retry.initialinterval=500ms"
-      # Enlace del middleware al router
-      - "traefik.http.routers.ms-cart.middlewares=circuitbreaker"
 
   ms-inventory:
     build: ./ms-inventory
     ports:
       - "5003:5003"
+    env_file:
+      - .env
     volumes:
       - ./ms-inventory:/app
     depends_on:
@@ -128,6 +108,8 @@ services:
     build: ./ms-payment
     ports:
       - "5004:5004"
+    env_file:
+      - .env
     volumes:
       - ./ms-payment:/app
     depends_on:
