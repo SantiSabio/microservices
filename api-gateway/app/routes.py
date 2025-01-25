@@ -1,5 +1,4 @@
-import os
-import requests
+import os, requests
 from flask import Blueprint, jsonify, request
 from .services import build_saga, execute_saga
 
