@@ -1,11 +1,6 @@
 from flask import jsonify
 from app.utils import response_from_url
-from dotenv import load_dotenv
 import os
-
-
-
-load_dotenv()
 
 add_purchase_url = os.getenv('ADD_PURCHASE_URL')
 remove_purchase_url = os.getenv('REMOVE_PURCHASE_URL')

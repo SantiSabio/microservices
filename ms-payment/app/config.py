@@ -1,8 +1,10 @@
-import os
-import redis
+import os,redis
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', 'mysql+mysqlconnector://root:password@mysql_db:3306/catalogodb')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    REDIS_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+    REDIS_URL = os.getenv('REDIS_URL')
     r = redis.StrictRedis.from_url(REDIS_URL)
