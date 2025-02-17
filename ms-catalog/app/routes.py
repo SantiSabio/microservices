@@ -1,5 +1,6 @@
 #ms-catalogo/app/routes.py
 from flask import Blueprint, jsonify, request
+import requests
 from .models import Product
 from app.config import Config
 import json
@@ -26,3 +27,14 @@ def get_catalogo():
         "pages": products.pages,
         "current_page": products.page
     })
+
+
+@catalogo.route('/catalogo/<int:product_id>', methods=['GET'])
+#primer paso validar producto existente
+def validate_product(product_id):
+    product = Product.query.get(product_id)
+    
+    if product and product.is_active == True:
+        return jsonify({"exists": True}), 200
+    else:
+        return jsonify({"exists": False}), 404

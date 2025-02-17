@@ -8,9 +8,9 @@ add_payment_url = os.getenv('ADD_PAYMENT_URL')
 remove_payment_url = os.getenv('REMOVE_PAYMENT_URL')
 update_stock_url = os.getenv('UPDATE_STOCK_URL')
 remove_stock_url = os.getenv('REMOVE_STOCK_URL')
+product_url = os.getenv('CATALOG_SERVICE_URL')
 
 
-# Paso 1: Enviar los datos de compra a ms-purchase
 def add_purchase(product_id, purchase_direction):
     purchase_data = {
         'product_id': product_id,
