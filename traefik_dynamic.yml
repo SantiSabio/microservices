@@ -1,0 +1,13 @@
+http:
+  middlewares:
+    circuit-breaker:
+      circuitBreaker:
+        expression: "LatencyAtQuantileMS(50.0) > 100"
+        fallbackDuration: "10s"
+    retry:
+      retries: 3
+    max-conn:
+      maxConn:
+        amount: 10
+        extractorFunc: "request.host"
+      

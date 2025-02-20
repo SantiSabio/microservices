@@ -1,6 +1,23 @@
 version: '3.8'
 
 services:
+
+  traefik:
+    image: traefik:3.3.2
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--providers.file.filename=/dynamic_conf/traefik_dynamic.yml"
+    ports:
+      - "81:80" # Port
+      - "8081:8080" # Web UI
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./traefik_dynamic.yml:/dynamic_conf/traefik_dynamic.yml"
+    networks:
+      - mynetwork
+
   mysql_db:
     image: mysql:5.7
     ports:
@@ -48,6 +65,11 @@ services:
       - redis
     networks:
       - mynetwork
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ms-catalog.rule=Host(`ms-catalog.localhost`)"
+      - "traefik.http.services.ms-catalog.loadbalancer.server.port=5001"
+      - "traefik.http.routers.ms-catalog.middlewares=circuit-breaker@file,retry@file,max-conn@file"
 
   ms-purchase:
     build: ./ms-purchase
@@ -63,6 +85,11 @@ services:
     networks:
       - mynetwork
 
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ms-purchase.rule=Host(`ms-purchase.localhost`)"
+      - "traefik.http.services.ms-purchase.loadbalancer.server.port=5002"
+      - "traefik.http.routers.ms-purchase.middlewares=circuit-breaker@file,retry@file,max-conn@file"
   ms-inventory:
     build: ./ms-inventory
     ports:
@@ -76,6 +103,11 @@ services:
       - redis
     networks:
       - mynetwork
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ms-inventory.rule=Host(`ms-inventory.localhost`)"
+      - "traefik.http.services.ms-inventory.loadbalancer.server.port=5003"
+      - "traefik.http.routers.ms-inventory.middlewares=circuit-breaker@file,retry@file,max-conn@file"
 
   ms-payment:
     build: ./ms-payment
@@ -90,6 +122,11 @@ services:
       - redis
     networks:
       - mynetwork
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ms-payment.rule=Host(`ms-payment.localhost`)"
+      - "traefik.http.services.ms-payment.loadbalancer.server.port=5004"
+      - "traefik.http.routers.ms-payment.middlewares=circuit-breaker@file,retry@file,max-conn@file"
 
   api-gateway:
     build: ./api-gateway
@@ -104,7 +141,11 @@ services:
       - ms-payment
     networks:
       - mynetwork
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-gateway.rule=Host(`api-gateway.localhost`)"
+      - "traefik.http.services.api-gateway.loadbalancer.server.port=5000"
+      - "traefik.http.routers.api-gateway.middlewares=circuit-breaker@file,retry@file,max-conn@file"
 volumes:
   mysql_data:
   redis_data:
