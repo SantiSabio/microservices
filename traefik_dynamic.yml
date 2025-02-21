@@ -5,9 +5,9 @@ http:
         expression: "LatencyAtQuantileMS(50.0) > 100"
         fallbackDuration: "10s"
     retry:
-      retries: 3
-    max-conn:
+      retry:
+        attempts: 3
+    maxconn:
       maxConn:
         amount: 10
         extractorFunc: "request.host"
-      

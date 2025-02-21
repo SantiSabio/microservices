@@ -2,22 +2,6 @@ version: '3.8'
 
 services:
 
-  traefik:
-    image: traefik:3.3.2
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
-      - "--providers.file.filename=/dynamic_conf/traefik_dynamic.yml"
-    ports:
-      - "81:80" # Port
-      - "8081:8080" # Web UI
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./traefik_dynamic.yml:/dynamic_conf/traefik_dynamic.yml"
-    networks:
-      - mynetwork
-
   mysql_db:
     image: mysql:5.7
     ports:
@@ -146,6 +130,25 @@ services:
       - "traefik.http.routers.api-gateway.rule=Host(`api-gateway.localhost`)"
       - "traefik.http.services.api-gateway.loadbalancer.server.port=5000"
       - "traefik.http.routers.api-gateway.middlewares=circuit-breaker@file,retry@file,max-conn@file"
+
+
+  traefik:
+    image: traefik:3.3.2
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--providers.file.filename=/dynamic_conf/traefik_dynamic.yml"
+    ports:
+      - "81:80" # Port
+      - "8081:8080" # Web UI
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./traefik_dynamic.yml:/dynamic_conf/traefik_dynamic.yml"
+    networks:
+      - mynetwork
+
+
 volumes:
   mysql_data:
   redis_data:
