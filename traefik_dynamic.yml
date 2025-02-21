@@ -7,7 +7,4 @@ http:
     retry:
       retry:
         attempts: 3
-    maxconn:
-      maxConn:
-        amount: 10
-        extractorFunc: "request.host"
+    
