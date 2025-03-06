@@ -78,7 +78,7 @@ def update_stock():
     
     try:
         # Acquire lock with timeout
-        if not lock.acquire(blocking=True, timeout=5):
+        if not lock.acquire(blocking=True, blocking_timeout=5):
             return jsonify({'error': 'Recurso solicitado en uso'}), 409
             
         redis_client.set('estado', 'abierto')
