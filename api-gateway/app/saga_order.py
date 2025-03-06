@@ -13,10 +13,10 @@ activate_product_url = 'http://ms-catalog:5001/set-active/'
 
 
 
-def activate_product(product_id):
+def activate_product(product_id,is_active):
     """Actualiza el estado is_active de un producto a True"""
     product_data = {
-        'is_active': True
+        'is_active':is_active
     }
     
     # Corregir la URL - importante añadir la barra antes del ID

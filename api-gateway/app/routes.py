@@ -38,7 +38,7 @@ def update_product_status(product_id):
         return jsonify({'error': 'El parámetro is_active es requerido'}), 400
         
     # Usar la función del archivo saga_order.py para activar el producto
-    result = activate_product(product_id)
+    result = activate_product(product_id,is_active=data['is_active'])
     
     if result is None:
         return jsonify({'error': 'No se pudo actualizar el estado del producto'}), 500

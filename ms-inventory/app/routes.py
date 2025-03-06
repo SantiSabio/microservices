@@ -54,6 +54,26 @@ def update_stock():
                         if stock_item.amount < data['amount']:
                             return jsonify({'error': 'Insufficient stock'}), 400
                         stock_item.amount -= data['amount']
+                        
+                        # Si el stock llega a cero, desactivamos el producto
+                        if stock_item.amount <= 0:  # Cambiado a <= 0 para mayor seguridad
+                            print(f"¡Producto {data['product_id']} sin stock! Intentando desactivar...")
+                            try:
+                                api_gateway_response = requests.patch(
+                                f"{Config.API_GATEWAY_URL}/activate/{data['product_id']}",
+                                json={"is_active": False},
+                                headers={"Content-Type": "application/json"}
+                            )
+                                
+                                
+                                if api_gateway_response.status_code >= 400:
+                                    print(f"Error al desactivar el producto en el catálogo: {api_gateway_response.text}")
+                                
+                            except Exception as e:
+                                print(f"Error al desactivar producto: {str(e)}")
+                                response_message['api_gateway_error'] = str(e)
+
+
                     elif data['in_out'] == 'in':
                         stock_item.amount += data['amount']
                         
@@ -65,10 +85,6 @@ def update_stock():
                                 headers={"Content-Type": "application/json"}
                             )
                             
-                            response_message['api_gateway_response'] = {
-                                'status_code': api_gateway_response.status_code,
-                                'content': api_gateway_response.text
-                            }
 
                             if api_gateway_response.status_code >= 400:
                                 print(f"Error al activar el producto en el catálogo: {api_gateway_response.text}")
