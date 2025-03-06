@@ -1,7 +1,10 @@
+import os, requests
 from flask import Blueprint, jsonify, request
+
 from app.services import build_saga, execute_saga
 from app.utils import activate_product 
 api_gateway = Blueprint('api_gateway', __name__)
+
 
 
 # Comenzar orden
@@ -23,10 +26,19 @@ def create_order():
     }
     # Construir saga
     saga = build_saga(saga_context)
-    order_result = execute_saga(saga)
-
-    return order_result
+    return execute_saga(saga)
     
+# Consultar catálogo
+@api_gateway.route('/catalog/<int:id>', methods=['GET'])
+def search_product(id):
+    get_product_url = f"{os.getenv("CATALOG_SERVICE_URL")}/{id}"
+    try:
+        response = requests.get(get_product_url)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': str(e)}), 500
+    
+
  # Importar la función que ya tienes
 
 # Endpoint para activar/desactivar productos
@@ -44,3 +56,4 @@ def update_product_status(product_id):
         return jsonify({'error': 'No se pudo actualizar el estado del producto'}), 500
         
     return jsonify({'message': 'Estado del producto actualizado correctamente', 'data': result}), 200
+

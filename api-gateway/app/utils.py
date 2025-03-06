@@ -1,4 +1,3 @@
-# app/utils.py
 import requests
 activate_product_url = 'http://ms-catalog:5001/set-active/'
 

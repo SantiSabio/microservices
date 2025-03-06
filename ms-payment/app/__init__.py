@@ -1,4 +1,4 @@
-#ms-payment/app/__init__.py
+import os
 from flask import Flask
 from app.config import Config
 from app.models import db

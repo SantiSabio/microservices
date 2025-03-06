@@ -1,7 +1,8 @@
-#ms-catalogo/app/__init__.py
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from app.config import Config
+
+
 from app.models import db
 
 def create_app():

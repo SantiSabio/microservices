@@ -87,7 +87,7 @@ for ($i=1; $i -le 10; $i++) {
 for i in {1..10}; do
   curl -X POST http://localhost:5003/inventory/update \
     -H "Content-Type: application/json" \
-    -d '{"product_id": 1, "ammount": 9, "in_out": "out"}'
+    -d '{"product_id": 1, "amount": 9, "in_out": "out"}'
 done
 ```
 

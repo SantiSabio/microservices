@@ -4,9 +4,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from app.config import Config
+
 import requests
 
 redis_client = Config.r
+
 inventory_bp = Blueprint('inventory', __name__)
 
 # Configuración de la base de datos
@@ -59,11 +61,11 @@ def process_stock_update(session, stock_item, amount, in_out):
     return response_message, 200
 
 @inventory_bp.route('/update', methods=['POST'])
+
 def update_stock():
     data = request.json
     required_fields = ['product_id', 'amount', 'in_out']
-
-    # Validate input fields
+    
     missing_fields = [field for field in required_fields if field not in data]
     present_fields = {field: data[field] for field in required_fields if field in data}
     
@@ -116,6 +118,7 @@ def update_stock():
             pipe.execute()
 
         if lock and lock.locked():
+
             lock.release()
         if session:
             session.close()

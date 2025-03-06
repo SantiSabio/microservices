@@ -1,4 +1,4 @@
-from flask import jsonify
+import os
 from app.utils import response_from_url
 import os
 
@@ -12,15 +12,12 @@ product_url = os.getenv('CATALOG_SERVICE_URL')
 
 
 
-
-
-
 def add_purchase(product_id, purchase_direction):
     purchase_data = {
         'product_id': product_id,
         'purchase_direction': purchase_direction
     }
-    
+
     response = response_from_url(add_purchase_url, purchase_data)
     
     if response.status_code == 201:
@@ -34,6 +31,7 @@ def remove_purchase(id_purchase):
     purchase_data = {
         'id_purchase': id_purchase
     }
+
     response = response_from_url(remove_purchase_url, purchase_data)
     
     if response.status_code == 200:
@@ -42,17 +40,15 @@ def remove_purchase(id_purchase):
         raise Exception(f"Error al remover la compra: {response.status_code}, {response.json()}")
 
 # Paso 2: Enviar los datos de pago a ms-payment
-def add_payment(product_id, amount,price,id_purchase,payment_method):
+def add_payment(product_id, amount, price, id_purchase, payment_method):
     payment_data = {
         'product_id': product_id,
         'amount': amount,
         'price': price,
         'id_purchase': id_purchase,
-        'payment_method': payment_method
-        
-       
+        'payment_method': payment_method      
     }
-    
+
     response = response_from_url(add_payment_url, payment_data)
     
     if response.status_code == 201:
@@ -65,7 +61,6 @@ def remove_payment(payment_id):
     payment_data = {
         'payment_id': payment_id
     }
-    
     response = response_from_url(remove_payment_url, payment_data)
     
     if response.status_code == 200:
@@ -80,6 +75,7 @@ def update_stock(product_id, amount, in_out):
         'amount': amount,
         'in_out': in_out
     }
+
     response = response_from_url(update_stock_url, stock_data)
     
     if in_out == 'in' and response.status_code == 200:
@@ -96,7 +92,7 @@ def remove_stock(stock_id):
     stock_data = {
         'stock_id': stock_id
     }
-    
+
     response = response_from_url(remove_stock_url, stock_data)
     
     if response.status_code == 200:

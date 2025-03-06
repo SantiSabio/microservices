@@ -1,8 +1,8 @@
-#ms-payment/app/routes.py
 from flask import Blueprint, request, jsonify
 from .models import db, Payment
 from app import Config
 import json
+
 
 payment = Blueprint('payment', __name__)
 

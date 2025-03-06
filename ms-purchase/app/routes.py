@@ -4,8 +4,10 @@ from flask import Blueprint, request, jsonify
 from app.models import db, Purchase
 from app import Config
 import json
+
 #from tenacity import retry, stop_after_attempt, wait_fixed
 #from pybreaker import CircuitBreaker, CircuitBreakerError
+
 
 #breaker = CircuitBreaker(fail_max=10, reset_timeout=10)
 
@@ -23,7 +25,7 @@ def add_purchase():
 
     # Validar que los datos necesarios estén presentes
     required_fields = ['product_id', 'purchase_direction']
-    if not all(field in data for field in required_fields):
+    if data is None or not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing fields'}), 400
     
     try:
@@ -45,6 +47,7 @@ def add_purchase():
             'purchase_direction': new_purchase.purchase_direction
         }
         
+
         try:
             Config.r.set(f"purchase:{new_purchase.id_purchase}", 
                         json.dumps(purchase_data), ex=3600)
@@ -59,10 +62,7 @@ def add_purchase():
         print(f"Error in add_purchase: {e}")
         db.session.rollback()  # Rollback en caso de error
         return jsonify({'error': str(e)}), 500
-
-
-
-
+    
 
 @purchase.route('/purchase/remove', methods=['POST'])
 #@breaker
@@ -88,9 +88,8 @@ def remove_purchase():
     
 
     #except CircuitBreakerError as e:
+
         return jsonify({'error': 'Circuito Abierto'}), 500
     except Exception as e:
         db.session.rollback()  # Hacer rollback en caso de error
         return jsonify({'error': str(e)}), 500
-
-        
