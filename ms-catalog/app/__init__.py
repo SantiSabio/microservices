@@ -9,7 +9,7 @@ def create_app():
     app = Flask(__name__)
     db.init_app(app)
     app.config.from_object(Config)
-    from .routes import catalogo
-    app.register_blueprint(catalogo)
+    from .routes import catalog
+    app.register_blueprint(catalog)
     
     return app

@@ -1,5 +1,4 @@
-
-#ms-catalogo/app/routes.py
+#ms-catalog/app/routes.py
 from flask import Blueprint, jsonify, request
 import requests
 from .models import Product, db
@@ -8,14 +7,14 @@ import json
 
 
 
-catalogo = Blueprint('catalogo', __name__)
+catalog = Blueprint('catalog', __name__)
 
 
 
 
 
-@catalogo.route('/catalogo', methods=['GET'])
-def get_catalogo():
+@catalog.route('/catalog', methods=['GET'])
+def get_catalog():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
@@ -23,8 +22,12 @@ def get_catalogo():
     product_list = [{"id": p.id, "name": p.name, "price": p.price, "is_active": p.is_active} for p in products.items]
 
     for product in product_list:
-        product_key = f"product:{product['id']}"
-        Config.r.client.set(product_key, json.dumps(product), ex=3600)  
+        if Config.redis_client is not None:
+            try:
+                product_key = f"product:{product['id']}"
+                Config.redis_client.set(product_key, json.dumps(product), ex=3600)
+            except Exception as e:
+                print(f"Redis caching error: {str(e)}")
 
 
     return jsonify({
@@ -35,7 +38,7 @@ def get_catalogo():
     })
 
 
-@catalogo.route('/catalogo/<int:product_id>', methods=['GET'])
+@catalog.route('/catalog/<int:product_id>', methods=['GET'])
 #primer paso validar producto existente
 def validate_product(product_id):
     product = Product.query.get(product_id)
@@ -46,7 +49,7 @@ def validate_product(product_id):
         return jsonify({"exists": False}), 404
     
 
-@catalogo.route('/set-active/<int:product_id>', methods=['PATCH'])
+@catalog.route('/set-active/<int:product_id>', methods=['PATCH'])
 def set_is_active(product_id):
     # Obtener los datos del request
     data = request.json
@@ -91,3 +94,26 @@ def set_is_active(product_id):
         # Revertir cambios en caso de error
         db.session.rollback()
         return jsonify({"error": f"Error al actualizar el estado del producto: {str(e)}"}), 500
+
+
+@catalog.route('/<int:product_id>', methods=['GET'])
+def get_product(product_id):
+    try:
+        product = Product.query.get(product_id)
+        
+        if not product:
+            return jsonify({"error": "Product not found"}), 404
+        
+        product_data = {
+            "id": product.id,
+            "name": product.name,
+            "price": product.price,
+            "is_active": product.is_active
+        }
+        
+        # No Redis caching for now to simplify
+        return jsonify(product_data)
+        
+    except Exception as e:
+        print(f"Error in get_product: {str(e)}")
+        return jsonify({"error": str(e)}), 500
