@@ -54,6 +54,7 @@ def update_stock():
                         stock_item.amount -= data['amount']
                     elif data['in_out'] == 'in':
                         stock_item.amount += data['amount']
+                        #logica para cambiar ms-catalog.is_Active -> True
                     else:
                         return jsonify({'error': 'Invalid in_out value'}), 400
                     redis_client.set('estado', 'cerrado')
