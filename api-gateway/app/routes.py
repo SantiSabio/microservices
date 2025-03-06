@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app.services import build_saga, execute_saga
-from app.saga_order import  activate_product
+from app.utils import activate_product 
 api_gateway = Blueprint('api_gateway', __name__)
 
 
@@ -27,7 +27,7 @@ def create_order():
 
     return order_result
     
-from app.saga_order import activate_product  # Importar la función que ya tienes
+ # Importar la función que ya tienes
 
 # Endpoint para activar/desactivar productos
 @api_gateway.route('/activate/<int:product_id>', methods=['PATCH'])

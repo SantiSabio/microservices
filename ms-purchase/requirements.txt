@@ -8,3 +8,5 @@ Werkzeug==2.3.0
 redis
 tenacity==8.0.1
 pybreaker==0.7.0
+python-dotenv
+pymysql

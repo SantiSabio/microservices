@@ -57,7 +57,7 @@ def update_stock():
                         
                         # Si el stock llega a cero, desactivamos el producto
                         if stock_item.amount <= 0:  # Cambiado a <= 0 para mayor seguridad
-                            print(f"¡Producto {data['product_id']} sin stock! Intentando desactivar...")
+                            
                             try:
                                 api_gateway_response = requests.patch(
                                 f"{Config.API_GATEWAY_URL}/activate/{data['product_id']}",
@@ -65,7 +65,7 @@ def update_stock():
                                 headers={"Content-Type": "application/json"}
                             )
                                 
-                                
+
                                 if api_gateway_response.status_code >= 400:
                                     print(f"Error al desactivar el producto en el catálogo: {api_gateway_response.text}")
                                 

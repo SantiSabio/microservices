@@ -11,3 +11,4 @@ tenacity==8.0.1
 pybreaker==0.7.0
 pymysql
 requests
+python-dotenv
