@@ -31,7 +31,7 @@ def create_order():
 # Consultar catálogo
 @api_gateway.route('/catalog/<int:id>', methods=['GET'])
 def search_product(id):
-    get_product_url = f"{os.getenv("CATALOG_SERVICE_URL")}/{id}"
+    get_product_url = f"{os.getenv('CATALOG_SERVICE_URL')}/{id}"
     try:
         response = requests.get(get_product_url)
         response.raise_for_status()

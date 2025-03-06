@@ -1,20 +1,7 @@
 version: '3.8'
 
 services:
-  traefik:
-    image: traefik:3.3.2
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker"
-    ports:
-      - "81:80" # Puerto
-      - "8081:8080" # Dashboard web
-
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    networks:
-      - mynetwork
-
+ 
   mysql_db:
 
     image: mysql:5.7
@@ -51,21 +38,6 @@ services:
     networks:
       - mynetwork
 
-  ms-purchase:
-    build: ./ms-purchase
-    ports:
-      - "5002:5002"
-    volumes:
-      - ./ms-purchase:/app
-    depends_on:
-      - mysql_db
-      - redis
-    networks:
-      - mynetwork
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ms-purchase.rule=Host(`ms-purchase.localhost`)"
-      - "traefik.http.services.ms-purchase.loadbalancer.server.port=5002"
 
   ms-catalog:
     build: ./ms-catalog
@@ -85,12 +57,13 @@ services:
       - "traefik.http.routers.ms-catalog.middlewares=circuit-breaker@file,retry@file"
 
 
-  ms-cart:
-    build: ./ms-cart
+  
+  ms-purchase:
+    build: ./ms-purchase
     ports:
       - "5002:5002"
     volumes:
-      - ./ms-cart:/app
+      - ./ms-purchase:/app
     depends_on:
       - mysql_db
       - redis
@@ -98,19 +71,9 @@ services:
       - mynetwork
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ms-cart.rule=PathPrefix(`/ms-cart`)"
-      - "traefik.http.services.ms-cart.loadbalancer.server.port=5002"
-      # Circuit Breaker
-      - "traefik.http.middlewares.circuitbreaker.retry.attempts=3"
-      - "traefik.http.middlewares.circuitbreaker.retry.initialinterval=500ms"
-      # Enlace del middleware al router
-      - "traefik.http.routers.ms-cart.middlewares=circuitbreaker"
-
-    labels:
-      - "traefik.enable=true"
       - "traefik.http.routers.ms-purchase.rule=Host(`ms-purchase.localhost`)"
       - "traefik.http.services.ms-purchase.loadbalancer.server.port=5002"
-      - "traefik.http.routers.ms-purchase.middlewares=circuit-breaker@file,retry@file"
+
   ms-inventory:
     build: ./ms-inventory
     ports:
