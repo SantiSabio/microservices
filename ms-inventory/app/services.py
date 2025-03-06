@@ -1,11 +1,11 @@
 from .models import db, Stock
 
-def update_stock(producto_id, cantidad, entrada_salida):
+def update_stock(product_id, amount, in_out):
     try:
         stock = Stock(
-            producto_id=producto_id,
-            cantidad=cantidad,
-            entrada_salida=entrada_salida
+            product_id=product_id,
+            amount=amount,
+            in_out=in_out
         )
         db.session.add(stock)
         db.session.commit()  # Garantiza la atomicidad y durabilidad
