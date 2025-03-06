@@ -6,4 +6,5 @@ Werkzeug==2.3.0
 Saga_py==1.1.0
 redis==4.1.0
 requests
-gunicorn==20.1.0
+uwsgi==2.0.20
+python-dotenv==0.19.1

@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["gunicorn", "-c", "gunicorn.conf.py", "run:app"]
+CMD ["uwsgi", "--http", "0.0.0.0:5001", "--module", "run:app", "--processes", "4", "--threads", "2"]
