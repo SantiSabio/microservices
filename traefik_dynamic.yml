@@ -1,0 +1,10 @@
+http:
+  middlewares:
+    circuit-breaker:
+      circuitBreaker:
+        expression: "LatencyAtQuantileMS(50.0) > 100"
+        fallbackDuration: "10s"
+    retry:
+      retry:
+        attempts: 3
+    

@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   traefik:
     image: traefik:3.3.2
@@ -14,12 +16,13 @@ services:
       - mynetwork
 
   mysql_db:
-    image: mysql:9.2.0
+
+    image: mysql:5.7
+
     ports:
       - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: catalogodb
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
@@ -79,11 +82,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.ms-catalog.rule=Host(`ms-catalog.localhost`)"
       - "traefik.http.services.ms-catalog.loadbalancer.server.port=5001"
-      # Circuit Breaker
-      - "traefik.http.middlewares.circuitbreaker.retry.attempts=3"
-      - "traefik.http.middlewares.circuitbreaker.retry.initialinterval=500ms"
-      # Enlace del middleware al router
-      - "traefik.http.routers.ms-catalog.middlewares=circuitbreaker"
+      - "traefik.http.routers.ms-catalog.middlewares=circuit-breaker@file,retry@file"
+
 
   ms-cart:
     build: ./ms-cart
@@ -106,6 +106,11 @@ services:
       # Enlace del middleware al router
       - "traefik.http.routers.ms-cart.middlewares=circuitbreaker"
 
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ms-purchase.rule=Host(`ms-purchase.localhost`)"
+      - "traefik.http.services.ms-purchase.loadbalancer.server.port=5002"
+      - "traefik.http.routers.ms-purchase.middlewares=circuit-breaker@file,retry@file"
   ms-inventory:
     build: ./ms-inventory
     ports:
@@ -121,11 +126,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.ms-inventory.rule=Host(`ms-inventory.localhost`)"
       - "traefik.http.services.ms-inventory.loadbalancer.server.port=5003"
-      # Circuit Breaker
-      - "traefik.http.middlewares.circuitbreaker.retry.attempts=3"
-      - "traefik.http.middlewares.circuitbreaker.retry.initialinterval=500ms"
-      # Enlace del middleware al router
-      - "traefik.http.routers.ms-inventory.middlewares=circuitbreaker"
+
+      - "traefik.http.routers.ms-inventory.middlewares=circuit-breaker@file,retry@file"
 
   ms-payment:
     build: ./ms-payment
@@ -142,11 +144,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.ms-payment.rule=Host(`ms-payment.localhost`)"
       - "traefik.http.services.ms-payment.loadbalancer.server.port=5004"
-      # Circuit Breaker
-      - "traefik.http.middlewares.circuitbreaker.retry.attempts=3"
-      - "traefik.http.middlewares.circuitbreaker.retry.initialinterval=500ms"
-      # Enlace del middleware al router
-      - "traefik.http.routers.ms-payment.middlewares=circuitbreaker"
+
+      - "traefik.http.routers.ms-payment.middlewares=circuit-breaker@file,retry@file"
+
 
   api-gateway:
     build: ./api-gateway
@@ -164,11 +164,26 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.api-gateway.rule=Host(`api-gateway.localhost`)"
       - "traefik.http.services.api-gateway.loadbalancer.server.port=5000"
-      # Circuit Breaker
-      - "traefik.http.middlewares.circuitbreaker.retry.attempts=3"
-      - "traefik.http.middlewares.circuitbreaker.retry.initialinterval=500ms"
-      # Enlace del middleware al router
-      - "traefik.http.routers.api-gateway.middlewares=circuitbreaker"
+
+      - "traefik.http.routers.api-gateway.middlewares=circuit-breaker@file,retry@file"
+
+
+  traefik:
+    image: traefik:3.3.2
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--providers.file.filename=/dynamic_conf/traefik_dynamic.yml"
+    ports:
+      - "81:80" # Port
+      - "8081:8080" # Web UI
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./traefik_dynamic.yml:/dynamic_conf/traefik_dynamic.yml"
+    networks:
+      - mynetwork
+
 
 volumes:
   mysql_data:

@@ -2,19 +2,12 @@ from flask import Blueprint, request, jsonify
 from .models import db, Payment
 from app import Config
 import json
-from tenacity import retry
-from tenacity.wait import wait_fixed
-from tenacity.stop import stop_after_attempt
-from pybreaker import CircuitBreaker, CircuitBreakerError
 
-breaker = CircuitBreaker(fail_max=10, reset_timeout=10)
 
 payment = Blueprint('payment', __name__)
 
 # Ruta para manejar la creación de compras
 @payment.route('/payment/add', methods=['POST'])
-@breaker
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 def add_payment():
     data = request.get_json()
     required_fields = ['product_id', 'price', 'payment_method','amount','id_purchase']
@@ -34,6 +27,11 @@ def add_payment():
             payment_method=data['payment_method']
         )
 
+        # Add to database first to get the ID
+        db.session.add(new_payment)
+        db.session.flush()  # This assigns the ID without committing
+
+        # Now we have the payment_id
         payment_data = {
             'payment_id': new_payment.payment_id,
             'product_id': new_payment.product_id,
@@ -43,39 +41,52 @@ def add_payment():
             'payment_method': new_payment.payment_method
         }
 
-        Config.r.set(f"payment:{payment_data['payment_id']}", json.dumps(payment_data), ex=3600)
+        # Save to Redis cache
+        if Config.r:
+            try:
+                Config.r.set(f"payment:{payment_data['payment_id']}", 
+                           json.dumps(payment_data), ex=3600)
+            except Exception as redis_err:
+                print(f"Redis error (non-critical): {redis_err}")
 
-        db.session.add(new_payment)
+        # Complete the transaction
         db.session.commit()
 
-        return jsonify({'message': 'Payment added successfully'}), 201
-    except CircuitBreakerError as e:
-        return jsonify({'error': 'Circuito Abierto'}), 500
+        # Return the payment ID for use in subsequent operations
+        return jsonify({
+            'message': 'Payment added successfully',
+            'payment_id': new_payment.payment_id
+        }), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 @payment.route('/payment/remove', methods=['POST'])
-@breaker
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 def remove_payment():
     data = request.get_json()
 
-    if not 'payment_id' in data:
-        return jsonify({'error': 'Missing fields'}), 400
+    # Validate payment_id exists and is not None
+    if 'payment_id' not in data or data['payment_id'] is None:
+        return jsonify({'error': 'Missing or invalid payment_id'}), 400
 
     try:
-        old_payment = Payment.query.get(data['payment_id'])
+        # Use filter_by instead of get to avoid SQLAlchemy warning
+        old_payment = Payment.query.filter_by(payment_id=data['payment_id']).first()
 
         if not old_payment:
             return jsonify({'error': 'Payment not found'}), 404
+
+        # Remove from cache if it exists
+        if Config.r:
+            try:
+                Config.r.delete(f"payment:{data['payment_id']}")
+            except Exception as redis_err:
+                print(f"Redis error (non-critical): {redis_err}")
 
         db.session.delete(old_payment)
         db.session.commit()
 
         return jsonify({'message': 'Payment removed successfully'}), 200
-    except CircuitBreakerError as e:
-        return jsonify({'error': 'Circuito Abierto'}), 500
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500

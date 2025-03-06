@@ -55,3 +55,17 @@ microservices/
 ├── docker-compose.yml
 ├── README.md
 └── .env
+
+
+
+
+
+### pasos para simular compra
+Invoke-RestMethod -Method POST -Uri "http://localhost:5000/order" -ContentType "application/json" -Body '{
+  "product_id": 2,
+  "amount": 1,
+  "payment_method": "debit_card",
+  "purchase_direction": "Avenida Libertad 456",
+  "in_out": "out",
+  "price": 15.50
+}'
