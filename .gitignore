@@ -1,5 +1,6 @@
-venv
-.venv
+venv/
+.env/
+.venv/
 .vscode/
 *.code-workspace
 __pycache__/
