@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app.services import build_saga, execute_saga
-
+from app.saga_order import  activate_product
 api_gateway = Blueprint('api_gateway', __name__)
 
 
@@ -27,3 +27,20 @@ def create_order():
 
     return order_result
     
+from app.saga_order import activate_product  # Importar la función que ya tienes
+
+# Endpoint para activar/desactivar productos
+@api_gateway.route('/activate/<int:product_id>', methods=['PATCH'])
+def update_product_status(product_id):
+    data = request.get_json()
+    
+    if 'is_active' not in data:
+        return jsonify({'error': 'El parámetro is_active es requerido'}), 400
+        
+    # Usar la función del archivo saga_order.py para activar el producto
+    result = activate_product(product_id)
+    
+    if result is None:
+        return jsonify({'error': 'No se pudo actualizar el estado del producto'}), 500
+        
+    return jsonify({'message': 'Estado del producto actualizado correctamente', 'data': result}), 200

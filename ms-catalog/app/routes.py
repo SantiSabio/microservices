@@ -1,10 +1,13 @@
 #ms-catalogo/app/routes.py
 from flask import Blueprint, jsonify, request
 import requests
-from .models import Product
+from .models import Product, db
 from app.config import Config
 import json
 catalogo = Blueprint('catalogo', __name__)
+
+
+
 
 
 
@@ -38,3 +41,50 @@ def validate_product(product_id):
         return jsonify({"exists": True}), 200
     else:
         return jsonify({"exists": False}), 404
+    
+
+@catalogo.route('/set-active/<int:product_id>', methods=['PATCH'])
+def set_is_active(product_id):
+    # Obtener los datos del request
+    data = request.json
+    
+    # Validar que se incluya el parámetro is_active
+    if 'is_active' not in data:
+        return jsonify({"error": "El parámetro 'is_active' es requerido"}), 400
+    
+    # Convertir explícitamente a booleano para asegurar el tipo correcto
+    is_active = bool(data['is_active'])
+    
+    # Buscar el producto por ID
+    product = Product.query.get(product_id)
+    
+    # Verificar si el producto existe
+    if not product:
+        return jsonify({"error": f"Producto con ID {product_id} no encontrado"}), 404
+    
+    # Actualizar el estado del producto
+    try:
+        product.is_active = is_active
+        db.session.commit()
+        
+        # Actualizar la caché si existe
+        product_key = f"product:{product_id}"
+        if Config.r.exists(product_key):
+            product_data = json.loads(Config.r.get(product_key))
+            product_data["is_active"] = is_active
+            Config.r.set(product_key, json.dumps(product_data), ex=3600)
+        
+        # Responder con el producto actualizado
+        return jsonify({
+            "message": f"Estado del producto actualizado correctamente a {'activo' if is_active else 'inactivo'}",
+            "product": {
+                "id": product.id,
+                "name": product.name,
+                "price": product.price,
+                "is_active": product.is_active
+            }
+        }), 200
+    except Exception as e:
+        # Revertir cambios en caso de error
+        db.session.rollback()
+        return jsonify({"error": f"Error al actualizar el estado del producto: {str(e)}"}), 500

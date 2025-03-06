@@ -10,6 +10,25 @@ class MockResponse:
     def json(self):
         return self._json_data
 
-def response_from_url(url, data):
-    response = requests.post(url, json=data)
-    return MockResponse(response.json(), response.status_code, response.text)
+def response_from_url(url, data=None, method='POST'):
+    """Envía una solicitud HTTP a una URL específica"""
+    
+    headers = {'Content-Type': 'application/json'}
+    
+    print(f"Enviando {method} a {url}")
+    print(f"Datos: {data}")
+    
+    try:
+        if method.upper() == 'POST':
+            return requests.post(url, json=data, headers=headers)
+        elif method.upper() == 'PATCH':
+            return requests.patch(url, json=data, headers=headers)
+        elif method.upper() == 'PUT':
+            return requests.put(url, json=data, headers=headers)
+        elif method.upper() == 'GET':
+            return requests.get(url, headers=headers)
+        else:
+            raise ValueError(f"Método HTTP no soportado: {method}")
+    except Exception as e:
+        print(f"Error en la solicitud HTTP: {e}")
+        raise

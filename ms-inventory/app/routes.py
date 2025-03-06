@@ -8,6 +8,7 @@ from tenacity import retry
 from tenacity.wait import wait_fixed
 from tenacity.stop import stop_after_attempt
 from pybreaker import CircuitBreaker, CircuitBreakerError
+import requests
 
 redis_client = Config.r
 
@@ -41,6 +42,7 @@ def update_stock():
             if redis_client.get('estado') == b'abierto':
                 return jsonify({'error': 'Circuito Abierto'}), 500
             else:
+                response_message = {}
                 with session.begin():
                     redis_client.set('estado', 'abierto')
                     stock_item = session.query(Stock).with_for_update().filter_by(product_id=data['product_id']).first()
@@ -54,13 +56,33 @@ def update_stock():
                         stock_item.amount -= data['amount']
                     elif data['in_out'] == 'in':
                         stock_item.amount += data['amount']
-                        #logica para cambiar ms-catalog.is_Active -> True
+                        
+                        try:
+                            # Solicitamos al API Gateway que actualice el campo is_active en el catálogo
+                            api_gateway_response = requests.patch(
+                                f"{Config.API_GATEWAY_URL}/activate/{data['product_id']}",
+                                json={"is_active": True},
+                                headers={"Content-Type": "application/json"}
+                            )
+                            
+                            response_message['api_gateway_response'] = {
+                                'status_code': api_gateway_response.status_code,
+                                'content': api_gateway_response.text
+                            }
+
+                            if api_gateway_response.status_code >= 400:
+                                print(f"Error al activar el producto en el catálogo: {api_gateway_response.text}")
+                                # Continuamos con la actualización del stock aunque falle la activación
+                        except requests.RequestException as e:
+                            print(f"Error de conexión con API Gateway: {str(e)}")
+                            response_message['api_gateway_error'] = str(e)
+
                     else:
                         return jsonify({'error': 'Invalid in_out value'}), 400
                     redis_client.set('estado', 'cerrado')
                     session.commit()
                     
-                return jsonify({'message': 'Stock updated successfully'}), 200
+                return jsonify(response_message), 200
         else:
             return jsonify({'error': 'Recurso solicitado en uso'}), 409
         
