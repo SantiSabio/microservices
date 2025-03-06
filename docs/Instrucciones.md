@@ -77,7 +77,7 @@ Al ejecutar en el terminal usando el product_id y la cantidad a comprar (out) y 
 
 ```powershell
 for ($i=1; $i -le 10; $i++) {
-    Invoke-RestMethod -Uri http://localhost:5003/inventory/update -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"product_id": 1, "ammount": 9, "in_out": "out"}'
+    Invoke-RestMethod -Uri http://localhost:5003/inventory/update -Method POST -Headers @{"Content-Type"="application/json"} -Body '{"product_id": 1, "amount": 9, "in_out": "out"}'
     }
 ```
 
@@ -87,6 +87,16 @@ for ($i=1; $i -le 10; $i++) {
 for i in {1..10}; do
   curl -X POST http://localhost:5003/inventory/update \
     -H "Content-Type: application/json" \
-    -d '{"product_id": 1, "ammount": 9, "in_out": "out"}'
+    -d '{"product_id": 1, "amount": 9, "in_out": "out"}'
 done
 ```
+
+docker exec -it microservices-ms-purchase-1 python -m unittest discover -s tests
+
+docker exec -it microservices-ms-inventory-1 python -m unittest discover -s tests
+
+docker exec -it microservices-ms-payment-1 python -m unittest discover -s tests  
+
+docker exec -it microservices-ms-catalog-1 python -m unittest discover -s tests  
+
+docker exec -it microservices-api-gateway-1 python -m unittest discover -s tests 

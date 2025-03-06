@@ -6,7 +6,6 @@ Este repositorio contiene una aplicación de microservicios para un sistema de c
 
 ## Requisitos
 
-- **Python**: 3.12.7
 - **Docker**
 - **Docker Compose**
 

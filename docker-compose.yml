@@ -1,22 +1,20 @@
-version: '3.8'
-
 services:
-
   traefik:
-    image: traefik:v2.5
+    image: traefik:3.3.2
     command:
       - "--api.insecure=true"
       - "--providers.docker"
     ports:
       - "81:80" # Puerto
       - "8081:8080" # Dashboard web
+
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       - mynetwork
 
   mysql_db:
-    image: mysql
+    image: mysql:9.2.0
     ports:
       - "3307:3306"
     environment:
@@ -29,33 +27,47 @@ services:
       - mynetwork
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    restart: always
+    image: phpmyadmin:5.2.2
     ports:
       - "8080:80"
     environment:
       PMA_HOST: mysql_db
       MYSQL_ROOT_PASSWORD: password
+    depends_on:
+      - mysql_db
     networks:
       - mynetwork
 
   redis:
-    image: redis
+    image: redis:7.4.2
     container_name: redis_cache
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    restart: always
     networks:
       - mynetwork
+
+  ms-purchase:
+    build: ./ms-purchase
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./ms-purchase:/app
+    depends_on:
+      - mysql_db
+      - redis
+    networks:
+      - mynetwork
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ms-purchase.rule=Host(`ms-purchase.localhost`)"
+      - "traefik.http.services.ms-purchase.loadbalancer.server.port=5002"
 
   ms-catalog:
     build: ./ms-catalog
     ports:
       - "5001:5001"
-    env_file:
-      - .env
     volumes:
       - ./ms-catalog:/app
     depends_on:
@@ -65,7 +77,7 @@ services:
       - mynetwork
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ms-catalog.rule=PathPrefix(`/ms-catalog`)"
+      - "traefik.http.routers.ms-catalog.rule=Host(`ms-catalog.localhost`)"
       - "traefik.http.services.ms-catalog.loadbalancer.server.port=5001"
       # Circuit Breaker
       - "traefik.http.middlewares.circuitbreaker.retry.attempts=3"
@@ -77,8 +89,6 @@ services:
     build: ./ms-cart
     ports:
       - "5002:5002"
-    env_file:
-      - .env
     volumes:
       - ./ms-cart:/app
     depends_on:
@@ -100,8 +110,6 @@ services:
     build: ./ms-inventory
     ports:
       - "5003:5003"
-    env_file:
-      - .env
     volumes:
       - ./ms-inventory:/app
     depends_on:
@@ -111,7 +119,7 @@ services:
       - mynetwork
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ms-inventory.rule=PathPrefix(`/ms-inventory`)"
+      - "traefik.http.routers.ms-inventory.rule=Host(`ms-inventory.localhost`)"
       - "traefik.http.services.ms-inventory.loadbalancer.server.port=5003"
       # Circuit Breaker
       - "traefik.http.middlewares.circuitbreaker.retry.attempts=3"
@@ -123,8 +131,6 @@ services:
     build: ./ms-payment
     ports:
       - "5004:5004"
-    env_file:
-      - .env
     volumes:
       - ./ms-payment:/app
     depends_on:
@@ -134,7 +140,7 @@ services:
       - mynetwork
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ms-payment.rule=PathPrefix(`/ms-payment`)"
+      - "traefik.http.routers.ms-payment.rule=Host(`ms-payment.localhost`)"
       - "traefik.http.services.ms-payment.loadbalancer.server.port=5004"
       # Circuit Breaker
       - "traefik.http.middlewares.circuitbreaker.retry.attempts=3"
@@ -150,14 +156,13 @@ services:
       - ./api-gateway:/app
     depends_on:
       - ms-catalog
-      - ms-cart
       - ms-inventory
       - ms-payment
     networks:
       - mynetwork
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api-gateway.rule=PathPrefix(`/api-gateway`)"
+      - "traefik.http.routers.api-gateway.rule=Host(`api-gateway.localhost`)"
       - "traefik.http.services.api-gateway.loadbalancer.server.port=5000"
       # Circuit Breaker
       - "traefik.http.middlewares.circuitbreaker.retry.attempts=3"

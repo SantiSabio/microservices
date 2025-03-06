@@ -1,10 +1,9 @@
-#ms-catalogo/app/routes.py
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, json, jsonify, request
+from .config import Config
 from .models import Product
-from app.config import Config
-import json
-catalogo = Blueprint('catalogo', __name__)
 
+
+catalogo = Blueprint('catalogo', __name__)
 
 
 @catalogo.route('/catalogo', methods=['GET'])
