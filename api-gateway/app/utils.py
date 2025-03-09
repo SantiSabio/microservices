@@ -1,4 +1,5 @@
 import requests
+
 activate_product_url = 'http://ms-catalog:5001/set-active/'
 
 class MockResponse:
@@ -38,10 +39,7 @@ def activate_product(product_id,is_active):
     product_data = {
         'is_active': is_active
     }
-    
-    # Corregir la URL - importante añadir la barra antes del ID
-    
-    
+    # Corregir la URL - importante añadir la barra antes del ID    
     print(f"Llamando a: {activate_product_url}/{product_id}")
     response = response_from_url(f"{activate_product_url}/{product_id}", product_data, method='PATCH')
     

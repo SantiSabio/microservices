@@ -1,6 +1,5 @@
 import os
 from app.utils import response_from_url
-import os
 
 add_purchase_url = os.getenv('ADD_PURCHASE_URL')
 remove_purchase_url = os.getenv('REMOVE_PURCHASE_URL')
@@ -9,7 +8,6 @@ remove_payment_url = os.getenv('REMOVE_PAYMENT_URL')
 update_stock_url = os.getenv('UPDATE_STOCK_URL')
 remove_stock_url = os.getenv('REMOVE_STOCK_URL')
 product_url = os.getenv('CATALOG_SERVICE_URL')
-
 
 
 def add_purchase(product_id, purchase_direction):

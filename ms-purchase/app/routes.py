@@ -47,10 +47,9 @@ def add_purchase():
             'purchase_direction': new_purchase.purchase_direction
         }
         
-
         try:
-            Config.r.set(f"purchase:{new_purchase.id_purchase}", 
-                        json.dumps(purchase_data), ex=3600)
+            # Guardar en cache por 1 hora
+            Config.r.set(f"purchase:{new_purchase.id_purchase}", json.dumps(purchase_data), ex=3600)
         except Exception as cache_error:
             print(f"Cache error (non-critical): {cache_error}")
 
@@ -87,9 +86,9 @@ def remove_purchase():
         return jsonify({'message': 'Purchase removed succesfully'}), 200
     
 
-    #except CircuitBreakerError as e:
-
-        return jsonify({'error': 'Circuito Abierto'}), 500
+    # except CircuitBreakerError as e:
+    #     return jsonify({'error': 'Circuito Abierto'}), 500
+    
     except Exception as e:
         db.session.rollback()  # Hacer rollback en caso de error
         return jsonify({'error': str(e)}), 500

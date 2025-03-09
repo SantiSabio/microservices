@@ -1,7 +1,6 @@
 from flask import Flask
 from app.routes import api_gateway
-import os
-import redis
+import os, redis
 
 def create_app():
     app = Flask(__name__)
