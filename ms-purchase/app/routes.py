@@ -5,10 +5,6 @@ from app.models import db, Purchase
 from app import Config
 import json
 
-#from tenacity import retry, stop_after_attempt, wait_fixed
-#from pybreaker import CircuitBreaker, CircuitBreakerError
-
-
 #breaker = CircuitBreaker(fail_max=10, reset_timeout=10)
 
 # Definicion del Blueprint
