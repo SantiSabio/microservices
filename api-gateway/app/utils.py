@@ -34,10 +34,10 @@ def response_from_url(url, data=None, method='POST'):
         print(f"Error en la solicitud HTTP: {e}")
         raise
 
-def activate_product(product_id,is_active):
+def activate_product(product_id):
     """Actualiza el estado is_active de un producto a True"""
     product_data = {
-        'is_active': is_active
+        'is_active': True
     }
     # Corregir la URL - importante añadir la barra antes del ID    
     print(f"Llamando a: {activate_product_url}/{product_id}")
