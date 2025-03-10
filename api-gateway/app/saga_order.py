@@ -1,5 +1,5 @@
 import os
-from app.utils import response_from_url
+from app.utils import activate_product, response_from_url
 
 add_purchase_url = os.getenv('ADD_PURCHASE_URL')
 remove_purchase_url = os.getenv('REMOVE_PURCHASE_URL')
@@ -19,8 +19,7 @@ def add_purchase(product_id, purchase_direction):
     response = response_from_url(add_purchase_url, purchase_data)
     
     if response.status_code == 201:
-        id_purchase = response.json().get('id_purchase')
-        return {'id_purchase': id_purchase}
+        return {'id_purchase': response.json().get('id_purchase')}
     else:
         raise Exception(f"Error al realizar el pago: {response.status_code}, {response.json()}")
 
@@ -33,7 +32,7 @@ def remove_purchase(id_purchase):
     response = response_from_url(remove_purchase_url, purchase_data)
     
     if response.status_code == 200:
-        return response.json()
+        return response
     else:
         raise Exception(f"Error al remover la compra: {response.status_code}, {response.json()}")
 
