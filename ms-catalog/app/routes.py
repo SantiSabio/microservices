@@ -1,21 +1,12 @@
-
-#ms-catalogo/app/routes.py
 from flask import Blueprint, jsonify, request
-import requests
 from .models import Product, db
 from app.config import Config
 import json
 
-
-
 catalogo = Blueprint('catalogo', __name__)
 
-
-
-
-
 @catalogo.route('/catalogo', methods=['GET'])
-def get_catalogo():
+def get_catalog():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
@@ -25,7 +16,6 @@ def get_catalogo():
     for product in product_list:
         product_key = f"product:{product['id']}"
         Config.r.client.set(product_key, json.dumps(product), ex=3600)  
-
 
     return jsonify({
         "products": product_list,
@@ -52,7 +42,7 @@ def set_is_active(product_id):
     data = request.json
     
     # Validar que se incluya el parámetro is_active
-    if 'is_active' not in data:
+    if not data or 'is_active' not in data:
         return jsonify({"error": "El parámetro 'is_active' es requerido"}), 400
     
     # Convertir explícitamente a booleano para asegurar el tipo correcto
@@ -68,7 +58,7 @@ def set_is_active(product_id):
     # Actualizar el estado del producto
     try:
         product.is_active = is_active
-        db.session.commit()
+        db.session().commit()
         
         # Actualizar la caché si existe
         product_key = f"product:{product_id}"
@@ -89,5 +79,5 @@ def set_is_active(product_id):
         }), 200
     except Exception as e:
         # Revertir cambios en caso de error
-        db.session.rollback()
+        db.session().rollback()
         return jsonify({"error": f"Error al actualizar el estado del producto: {str(e)}"}), 500
