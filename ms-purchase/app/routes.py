@@ -5,19 +5,10 @@ from app.models import db, Purchase
 from app import Config
 import json
 
-#from tenacity import retry, stop_after_attempt, wait_fixed
-#from pybreaker import CircuitBreaker, CircuitBreakerError
-
-
-#breaker = CircuitBreaker(fail_max=10, reset_timeout=10)
 
 # Definicion del Blueprint
 purchase = Blueprint('purchase', __name__)
 
-# Ruta para manejar la creación de compras
-#@purchase.route('/purchase/add', methods=['POST'])
-#@breaker
-#@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 @purchase.route('/purchase/add', methods=['POST'])
 def add_purchase():
     data = request.get_json()
@@ -64,10 +55,8 @@ def add_purchase():
         return jsonify({'error': str(e)}), 500
     
 
-@purchase.route('/purchase/remove', methods=['POST'])
-#@breaker
-#@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.5))
 #Ruta para manejar la eliminacion de una compra
+@purchase.route('/purchase/remove', methods=['POST'])
 def remove_purchase():
     data = request.get_json()
 
@@ -86,10 +75,6 @@ def remove_purchase():
         db.session.commit()
         return jsonify({'message': 'Purchase removed succesfully'}), 200
     
-
-    #except CircuitBreakerError as e:
-
-        return jsonify({'error': 'Circuito Abierto'}), 500
     except Exception as e:
         db.session.rollback()  # Hacer rollback en caso de error
         return jsonify({'error': str(e)}), 500

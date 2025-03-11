@@ -17,15 +17,16 @@ Session = sessionmaker(bind=engine)
 
 # Helper functions
 def update_product_status(product_id, is_active):
-    """Update product active status in catalog through API Gateway"""
+    #cambiar el estado de un producto mediante api gateway
     response_message = {}
     try:
+        #mandamos solicitud PATCH a la API Gateway
         api_gateway_response = requests.patch(
             f"{Config.API_GATEWAY_URL}/activate/{product_id}",
             json={"is_active": is_active},
             headers={"Content-Type": "application/json"}
         )
-        
+        #definimos por defecto desactivar el producto
         status_text = "activar" if is_active else "desactivar"
         if api_gateway_response.status_code >= 400:
             print(f"Error al {status_text} el producto: {api_gateway_response.text}")
@@ -34,10 +35,10 @@ def update_product_status(product_id, is_active):
         print(f"Error de conexión con API Gateway: {str(e)}")
         response_message['api_gateway_error'] = str(e)
     
-    return response_message
+    return response_message #devolvemos todas las respuestas
 
 def process_stock_update(session, stock_item, amount, in_out):
-    """Process stock update based on in_out direction"""
+    #Activamos o desactivamos un producto dependiendo si sube o baja stock
     response_message = {}
     
     if in_out == 'out':
@@ -46,14 +47,14 @@ def process_stock_update(session, stock_item, amount, in_out):
             
         stock_item.amount -= amount
         
-        # Check if stock is depleted
+        # Check si nos quedamos sin stock por la compra
         if stock_item.amount <= 0:
             print(f"¡Producto {stock_item.product_id} sin stock! Intentando desactivar...")
-            response_message.update(update_product_status(stock_item.product_id, False))
+            response_message.update(update_product_status(stock_item.product_id, False)) #desactivamos el producto
             
     elif in_out == 'in':
         stock_item.amount += amount
-        response_message.update(update_product_status(stock_item.product_id, True))
+        response_message.update(update_product_status(stock_item.product_id, True)) #activamos el producto
         
     else:
         return {'error': 'Invalid in_out value'}, 400
@@ -72,27 +73,27 @@ def update_stock():
     if missing_fields:
         return jsonify({'error': 'Missing fields', 'present_fields': present_fields}), 400
 
-    # Acquire resource lock
+    # Bloqueamos el hilo
     lock = redis_client.lock('stock_lock', timeout=10)
     session = None
     
     try:
-        # Acquire lock with timeout
+        # Damos un bloqueo de 5 segundos
         if not lock.acquire(blocking=True, blocking_timeout=5):
             return jsonify({'error': 'Recurso solicitado en uso'}), 409
             
-        redis_client.set('estado', 'abierto')
+        redis_client.set('estado', 'abierto') #abrimos el circuito , no dejamos hacer solicitudes al stock
         session = Session()
         
         with session.begin():
-            # Get stock with lock for update
+            # Obtenemos el profucto mientras el circuito esta abierto
             stock_item = session.query(Stock).with_for_update().filter_by(
                 product_id=data['product_id']).first()
                 
             if not stock_item:
                 return jsonify({'error': 'Stock not found'}), 404
                 
-            # Process the stock update
+            #Cambiamos el stock del producto
             response_message, status_code = process_stock_update(
                 session, 
                 stock_item, 
@@ -112,7 +113,7 @@ def update_stock():
             session.rollback()
         return jsonify({'error': str(e)}), 500
     finally:
-        # Clean up resources
+        # Cerramos el circuito y liberamos el bloqueo
         with redis_client.pipeline() as pipe:
             pipe.set('estado', 'cerrado')
             pipe.execute()

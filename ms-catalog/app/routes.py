@@ -6,11 +6,7 @@ from app.config import Config
 import json
 
 
-
 catalog = Blueprint('catalog', __name__)
-
-
-
 
 
 @catalog.route('/catalog', methods=['GET'])
@@ -20,7 +16,7 @@ def get_catalog():
     
     products = Product.query.paginate(page=page, per_page=per_page)
     product_list = [{"id": p.id, "name": p.name, "price": p.price, "is_active": p.is_active} for p in products.items]
-
+    #obtenemos la lista de productos y la guardamos en redis
     for product in product_list:
         if Config.redis_client is not None:
             try:
@@ -29,7 +25,7 @@ def get_catalog():
             except Exception as e:
                 print(f"Redis caching error: {str(e)}")
 
-
+    #Devolvemos un json con todos los productos
     return jsonify({
         "products": product_list,
         "total": products.total,
@@ -110,8 +106,8 @@ def get_product(product_id):
             "price": product.price,
             "is_active": product.is_active
         }
-        
-        # No Redis caching for now to simplify
+        #lo almacenamos al producto existente en redis
+        Config.r.set(f"product:{product_id}", json.dumps(product_data), ex=3600)
         return jsonify(product_data)
         
     except Exception as e:

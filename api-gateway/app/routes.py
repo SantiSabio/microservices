@@ -21,15 +21,15 @@ def create_order():
     
     # Obtener el precio del producto desde el servicio de catálogo
     try:
-        # Hard-code the URL format to ensure correctness
-        base_url = os.getenv('CATALOG_SERVICE_URL', 'http://ms-catalog:5001')
+        # Obtener la URL base del servicio de catálogo
+        base_url = os.getenv('CATALOG_SERVICE_URL')
         # Remove any trailing /catalog if present
         if base_url.endswith('/catalog'):
-            base_url = base_url[:-8]  # Remove trailing /catalog
+            base_url = base_url[:-8]  # eliminar /catalog
         elif base_url.endswith('/'):
-            base_url = base_url[:-1]  # Remove trailing slash
+            base_url = base_url[:-1]  # eliminar /
             
-        # Now construct the correct URL
+        # Construir ur
         catalog_url = f"{base_url}/{data['product_id']}"
         
         print(f"Calling catalog service at: {catalog_url}")
@@ -41,20 +41,20 @@ def create_order():
         product_info = catalog_response.json()
         print(f"Product info: {product_info}")
         
-        # Get the is_active value
+        # Obtener el campo is?active
         is_active = product_info.get('is_active')
         print(f"Raw is_active value: {is_active}, Type: {type(is_active).__name__}")
 
-        # Convert various forms of boolean-like values to actual boolean
+        # Convertir a boolean
         if isinstance(is_active, str):
             is_active = is_active.lower() in ('true', 'yes', '1')
         elif isinstance(is_active, int):
             is_active = bool(is_active)
-        # Otherwise assume it's already a boolean
+        # de otro modo considerarlo boolean
 
         print(f"Processed is_active value: {is_active}")
 
-        # Check if product is active
+        # Checkear si el producto está activo
         if not is_active:
             return jsonify({'error': 'El producto no está activo o no existe'}), 400
         
@@ -79,7 +79,7 @@ def create_order():
     saga = build_saga(saga_context)
     return execute_saga(saga)
     
-# Consultar catálogo
+# Consultar catálogo con el id que le pasamos
 @api_gateway.route('/catalog/<int:id>', methods=['GET'])
 def search_product(id):
     get_product_url = f"{os.getenv('CATALOG_SERVICE_URL')}/{id}"
@@ -90,7 +90,6 @@ def search_product(id):
         return jsonify({'error': str(e)}), 500
     
 
- # Importar la función que ya tienes
 
 # Endpoint para activar/desactivar productos
 @api_gateway.route('/activate/<int:product_id>', methods=['PATCH'])

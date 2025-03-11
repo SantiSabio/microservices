@@ -1,5 +1,5 @@
 import os
-from app.utils import response_from_url
+from app.utils import response_from_url,activate_product
 import os
 
 add_purchase_url = os.getenv('ADD_PURCHASE_URL')
