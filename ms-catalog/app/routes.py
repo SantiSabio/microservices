@@ -70,11 +70,16 @@ def set_is_active(product_id):
         db.session.commit()
         
         # Actualizar la caché si existe
-        product_key = f"product:{product_id}"
-        if Config.r.exists(product_key):
-            product_data = json.loads(Config.r.get(product_key))
-            product_data["is_active"] = is_active
-            Config.r.set(product_key, json.dumps(product_data), ex=3600)
+        try:
+            product_key = f"product:{product_id}"
+            if Config.redis_client is not None:
+                if Config.redis_client.exists(product_key):
+                    product_data = json.loads(Config.redis_client.get(product_key))
+                    product_data["is_active"] = is_active
+                    Config.redis_client.set(product_key, json.dumps(product_data), ex=3600)
+        except Exception as redis_error:
+            # Log the error but continue - Redis caching is not critical
+            print(f"Redis caching error in set_is_active: {str(redis_error)}")
         
         # Responder con el producto actualizado
         return jsonify({
@@ -106,8 +111,15 @@ def get_product(product_id):
             "price": product.price,
             "is_active": product.is_active
         }
-        #lo almacenamos al producto existente en redis
-        Config.r.set(f"product:{product_id}", json.dumps(product_data), ex=3600)
+        
+        # Store product in Redis with proper error handling
+        try:
+            if Config.redis_client is not None:
+                Config.redis_client.set(f"product:{product_id}", json.dumps(product_data), ex=3600)
+        except Exception as redis_error:
+            # Log the error but continue - Redis caching is not critical for functionality
+            print(f"Redis caching error in get_product: {str(redis_error)}")
+            
         return jsonify(product_data)
         
     except Exception as e:
