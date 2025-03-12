@@ -5,12 +5,19 @@ services:
     command:
       - "--api.insecure=true"
       - "--providers.docker"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+      - "--log.level=DEBUG"  # Esto activa los logs detallados
+      - "--accesslog=true"  # Habilita el log de acceso
+      - "--accesslog.filepath=/var/log/traefik/access.log"
+
     ports:
       - "81:80" # Puerto
       - "8081:8080" # Dashboard web
 
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./dynamic.yml:/etc/traefik/dynamic.yml"
+      - "./traefik/log:/var/log/traefik" 
     networks:
       - mynetwork
 
