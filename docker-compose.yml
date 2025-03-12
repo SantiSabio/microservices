@@ -1,11 +1,22 @@
-version: '3.8'
-
 services:
- 
+  traefik:
+    container_name: traefik
+    image: traefik:3.3.2
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker"
+    ports:
+      - "81:80" # Puerto
+      - "8081:8080" # Dashboard web
+
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - mynetwork
+
   mysql_db:
-
+    container_name: mysql_db
     image: mysql:5.7
-
     ports:
       - "3307:3306"
     environment:
@@ -17,6 +28,7 @@ services:
       - mynetwork
 
   phpmyadmin:
+    container_name: phpmyadmin
     image: phpmyadmin:5.2.2
     ports:
       - "8080:80"
@@ -29,8 +41,8 @@ services:
       - mynetwork
 
   redis:
-    image: redis:7.4.2
     container_name: redis_cache
+    image: redis:7.4.2
     ports:
       - "6379:6379"
     volumes:
@@ -38,8 +50,25 @@ services:
     networks:
       - mynetwork
 
+  ms-purchase:
+    container_name: ms-purchase
+    build: ./ms-purchase
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./ms-purchase:/app
+    depends_on:
+      - mysql_db
+      - redis
+    networks:
+      - mynetwork
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ms-purchase.rule=Host(`ms-purchase.localhost`)"
+      - "traefik.http.services.ms-purchase.loadbalancer.server.port=5002"
 
   ms-catalog:
+    container_name: ms-catalog
     build: ./ms-catalog
     ports:
       - "5001:5001"
@@ -56,26 +85,11 @@ services:
       - "traefik.http.services.ms-catalog.loadbalancer.server.port=5001"
       - "traefik.http.routers.ms-catalog.middlewares=circuit-breaker@file,retry@file"
 
-
-  
-  ms-purchase:
-    build: ./ms-purchase
-    ports:
-      - "5002:5002"
-    volumes:
-      - ./ms-purchase:/app
-    depends_on:
-      - mysql_db
-      - redis
-    networks:
-      - mynetwork
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ms-purchase.rule=Host(`ms-purchase.localhost`)"
-      - "traefik.http.services.ms-purchase.loadbalancer.server.port=5002"
-
   ms-inventory:
+    container_name: ms-inventory
     build: ./ms-inventory
+    # image: ms-inventory:v1.0.5
+    # image: ms-inventory:v1.0.1-uwsgi 
     ports:
       - "5003:5003"
     volumes:
@@ -89,10 +103,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.ms-inventory.rule=Host(`ms-inventory.localhost`)"
       - "traefik.http.services.ms-inventory.loadbalancer.server.port=5003"
-
       - "traefik.http.routers.ms-inventory.middlewares=circuit-breaker@file,retry@file"
 
   ms-payment:
+    container_name: ms-payment
     build: ./ms-payment
     ports:
       - "5004:5004"
@@ -107,17 +121,18 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.ms-payment.rule=Host(`ms-payment.localhost`)"
       - "traefik.http.services.ms-payment.loadbalancer.server.port=5004"
-
       - "traefik.http.routers.ms-payment.middlewares=circuit-breaker@file,retry@file"
 
-
   api-gateway:
+    container_name: api-gateway
     build: ./api-gateway
     ports:
       - "5000:5000"
     volumes:
       - ./api-gateway:/app
     depends_on:
+      - mysql_db
+      - redis
       - ms-catalog
       - ms-inventory
       - ms-payment
@@ -127,26 +142,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.api-gateway.rule=Host(`api-gateway.localhost`)"
       - "traefik.http.services.api-gateway.loadbalancer.server.port=5000"
-
       - "traefik.http.routers.api-gateway.middlewares=circuit-breaker@file,retry@file"
-
-
-  traefik:
-    image: traefik:3.3.2
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
-      - "--providers.file.filename=/dynamic_conf/traefik_dynamic.yml"
-    ports:
-      - "81:80" # Port
-      - "8081:8080" # Web UI
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./traefik_dynamic.yml:/dynamic_conf/traefik_dynamic.yml"
-    networks:
-      - mynetwork
-
 
 volumes:
   mysql_data:
