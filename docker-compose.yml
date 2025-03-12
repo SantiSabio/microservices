@@ -87,9 +87,9 @@ services:
 
   ms-inventory:
     container_name: ms-inventory
-    # build: ./ms-inventory
+    build: ./ms-inventory
     # image: ms-inventory:v1.0.5
-    image: ms-inventory:v1.0.0-uwsgi 
+    # image: ms-inventory:v1.0.1-uwsgi 
     ports:
       - "5003:5003"
     volumes:
