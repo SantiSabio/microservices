@@ -7,7 +7,7 @@ from app.config import Config
 
 import requests
 
-redis_client = Config.r
+redis_client = Config.redis_client
 
 inventory_bp = Blueprint('inventory', __name__)
 

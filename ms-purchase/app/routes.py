@@ -5,6 +5,7 @@ from app.models import db, Purchase
 from app import Config
 import json
 
+redis_client = Config.redis_client
 
 # Definicion del Blueprint
 purchase = Blueprint('purchase', __name__)
@@ -40,7 +41,7 @@ def add_purchase():
         
 
         try:
-            Config.r.set(f"purchase:{new_purchase.id_purchase}", 
+            redis_client.set(f"purchase:{new_purchase.id_purchase}", 
                         json.dumps(purchase_data), ex=3600)
         except Exception as cache_error:
             print(f"Cache error (non-critical): {cache_error}")

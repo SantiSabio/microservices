@@ -3,7 +3,7 @@ from .models import db, Payment
 from app import Config
 import json
 
-
+redis_client = Config.redis_client
 payment = Blueprint('payment', __name__)
 
 # Ruta para manejar la creación de compras
@@ -42,9 +42,9 @@ def add_payment():
         }
 
         # Save to Redis cache
-        if Config.r:
+        if redis_client:
             try:
-                Config.r.set(f"payment:{payment_data['payment_id']}", 
+                redis_client.set(f"payment:{payment_data['payment_id']}", 
                            json.dumps(payment_data), ex=3600)
             except Exception as redis_err:
                 print(f"Redis error (non-critical): {redis_err}")
@@ -77,9 +77,9 @@ def remove_payment():
             return jsonify({'error': 'Payment not found'}), 404
 
         # Remove from cache if it exists
-        if Config.r:
+        if redis_client:
             try:
-                Config.r.delete(f"payment:{data['payment_id']}")
+                redis_client.delete(f"payment:{data['payment_id']}")
             except Exception as redis_err:
                 print(f"Redis error (non-critical): {redis_err}")
 
